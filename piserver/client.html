@@ -2,62 +2,7 @@
 	<head>
 	</head>
 	<body>
-		<script>
-			var keys = {};
-		
-			document.onkeydown = function(e){ 
-				
-				switch(e.code){
-					case "ArrowLeft":
-						if(keys["left"] == true){
-							break;
-						}
-						keys["left"] = true;
-						console.log(e.code + " DOWN"); 
-						var req = new XMLHttpRequest();
-						req.open("GET", "http://localhost:3000/left/on", false);
-						req.send(null);
-						break;
-					case "ArrowRight":
-						if(keys["right"] == true){
-							break;
-						}
-						keys["right"] = true
-						console.log(e.code + " DOWN"); 
-						var req = new XMLHttpRequest();
-						req.open("GET", "http://localhost:3000/right/on", false);
-						req.send(null);
-						break;
-				}
-				
-				
-			}
-			
-			document.onkeyup = function(e){
-				
-				switch(e.code){
-					case "ArrowLeft":
-						if(keys["left"] != true){
-							break;
-						}
-						keys["left"] = false;
-						console.log(e.code + " UP"); 
-						var req = new XMLHttpRequest();
-						req.open("GET", "http://localhost:3000/left/off", false);
-						req.send(null);
-						break;
-					case "ArrowRight":
-						if(keys["right"] != true){
-							break;
-						}
-						keys["right"] = false;
-						console.log(e.code + " UP"); 
-						var req = new XMLHttpRequest();
-						req.open("GET", "http://localhost:3000/right/off", false);
-						req.send(null);
-						break;
-				}
-			}
-		</script>
+		<input id="steeringWheel" type="range" min=-50 max=50 />
+		<script src="client.js"></script>
 	</body>
 </html>
