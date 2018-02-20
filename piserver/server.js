@@ -1,9 +1,61 @@
 // content of index.js
-const http = require('http')
-const port = 3000
+const http = require('http');
+const port = 3000;
+
+// these 3 parameters need to be figured out by trial & error
+const maximumVelocity = 10;
+const poweredAcceleration = 5;
+const frictionCoefficient = 0.3;
+
+// parameter to set position we are aiming towards
+var targetPosition = 0;
+
+// stores current turn action of motor
+var currentTurnData = {
+	position: 0,
+	velocity: 0,
+	acceleration: 0
+}
+
+var getDeltaS = (u, v, a) => {
+	return (v * v - u * u) / (2 * a)
+}
+
+var drive = () => {
+	var calculatedAcceleration;
+
+	var deltaS = getDeltaS(currentTurnData.velocity, 0, -currentTurnData.velocity * frictionCoefficient);
+
+	if(currentTurnData.position > targetPosition + deltaS){
+		// todo: turn Motor backward
+		calculatedAcceleration = - poweredAcceleration;
+	}
+	else if(currentTurnData.position < targetPosition - deltaS){
+		// todo: turn Motor forward
+		calculatedAcceleration = poweredAcceleration;
+	}
+	else{
+		// todo: turn Motor off
+		calculatedAcceleration = -currentTurnData.velocity * frictionCoefficient;
+	}
+
+	var newTurnData = {
+		position: currentTurnData.position + currentTurnData.velocity,
+		velocity: Math.min(maximumVelocity, currentTurnData.velocity + currentTurnData.acceleration),
+		acceleration: calculatedAcceleration
+	}
+
+	if(newTurnData.position != currentTurnData.position){
+		console.log(`(${newTurnData.position}, ${newTurnData.velocity}, ${newTurnData.acceleration})`);
+	}
+
+	currentTurnData = newTurnData;
+
+	setTimeout(() => drive(), 10)
+}
 
 var frontTurn = (turnPosition) => {
-
+	targetPosition = turnPosition;
 }
 
 var requestResponses = [
@@ -16,7 +68,7 @@ var requestResponses = [
 	{url: "/down/on", response: () => console.log("down on")},
 	{url: "/down/off", response: () => console.log("down off")},
 	{url: "/turn", response: (d) => console.log("turning to: " + (+d))},
-	{url: "/turn", response: (d) => frontTurn}
+	{url: "/turn", response: frontTurn}
 ]
 
 const requestHandler = (request, response) => {
