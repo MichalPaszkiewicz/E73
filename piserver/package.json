@@ -1,0 +1,15 @@
+{
+  "name": "piserver",
+  "version": "1.0.0",
+  "description": "Program for running our robot",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "rpi-gpio": "^0.9.1"
+  },
+  "author": "E73",
+  "license": "MIT"
+}

@@ -1,6 +1,60 @@
 // content of index.js
 const http = require('http');
+var gpio = require("rpi-gpio");
 const port = 3000;
+
+//setup gpios for writing
+class Motor{
+	_enablePin;
+	_forwardPin;
+	_backwardPin;
+
+	_goingForwards = false;
+	_goingBackwards = false;
+
+	constructor(enablePin, forwardPin, backwardPin){
+		this._enablePin = enablePin;
+		gpio.setup(enablePin, gpio.DIR_OUT, (e) => {console.log(e)});
+		this._forwardPin = forwardPin;
+		gpio.setup(forwardPin, gpio.DIR_OUT, (e) => {console.log(e)});
+		this._backwardPin = backwardPin;
+		gpio.setup(backwardPin, gpio.DIR_OUT, (e) => {console.log(e)});		
+	}
+
+	forward(){
+		var self = this;
+		if(self._goingBackwards){
+			return;
+		}
+		gpio.write(self._forwardPin, true);
+		gpio.write(self._backwardPin, false);
+		gpio.write(self._enablePin, true);
+		self._goingForwards = true;
+	}
+
+	backward(){
+		var self = this;
+		if(self._goingForwards){
+			return;
+		}
+		gpio.write(self._backwardPin, true);
+		gpio.write(self._forwardPin, false);
+		gpio.write(self._enablePin, true);
+		self._goingBackwards = true;
+	}
+
+	off(){
+		var self = this;
+		self._goingForwards = false;
+		self._goingBackwards = false;
+		gpio.write(self._enablePin, false);		
+	}
+}
+
+var motor1 = new Motor(5, 24, 27); // forwards motor
+var motor2 = new Motor(17, 6, 22);
+var motor3 = new Motor(12, 23, 16); // side to side motor
+var motor4 = new Motor(25, 13, 18);
 
 // these 3 parameters need to be figured out by trial & error
 const maximumVelocity = 10;
@@ -27,15 +81,15 @@ var drive = () => {
 	var deltaS = getDeltaS(currentTurnData.velocity, 0, -currentTurnData.velocity * frictionCoefficient);
 
 	if(currentTurnData.position > targetPosition + deltaS){
-		// todo: turn Motor backward
+		motor3.backward();
 		calculatedAcceleration = - poweredAcceleration;
 	}
 	else if(currentTurnData.position < targetPosition - deltaS){
-		// todo: turn Motor forward
+		motor3.forward();
 		calculatedAcceleration = poweredAcceleration;
 	}
 	else{
-		// todo: turn Motor off
+		motor3.off();
 		calculatedAcceleration = -currentTurnData.velocity * frictionCoefficient;
 	}
 
@@ -68,7 +122,19 @@ var requestResponses = [
 	{url: "/down/on", response: () => console.log("down on")},
 	{url: "/down/off", response: () => console.log("down off")},
 	{url: "/turn", response: (d) => console.log("turning to: " + (+d))},
-	{url: "/turn", response: frontTurn}
+	{url: "/turn", response: frontTurn},
+	{url: "/up/on", response: () => {
+		motor1.forward();
+	}},
+	{url: "/up/off", response: () => {
+		motor1.off();
+	}},
+	{url: "/down/on", response: () => {
+		motor1.backward();
+	}},
+	{url: "/down/off", response: () => {
+		motor1.off();
+	}}
 ]
 
 const requestHandler = (request, response) => {
@@ -98,4 +164,16 @@ server.listen(port, (err) => {
   }
 
   console.log(`server is listening on ${port}`)
+})
+
+
+function closePins() {
+    gpio.destroy(function() {
+        console.log('All pins unexported');
+    });
+}
+
+process.on('SIGINT', () => {
+	closePins();
+	process.exit();
 })
