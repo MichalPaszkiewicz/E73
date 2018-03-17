@@ -2,7 +2,14 @@
 	<head>
 	</head>
 	<body>
-		<input id="steeringWheel" type="range" min=-50 max=50 />
+		<div>
+			<span>Speed: </span>
+			<input id="speed" type="range" min=0 max=100 />
+		</div>
+		<div>
+				<button id="trimleft">Trim Left</button>
+				<button id="trimright">Trim Right</button>
+		</div>
 		<script src="client.js"></script>
 	</body>
 </html>

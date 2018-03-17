@@ -55,4 +55,12 @@ document.onkeyup = e => {
     }
 }
 
-steeringWheel.onchange = e => {postRequest("/turn", e.target.value)}
+trimleft.onclick = e => {
+    postRequest("/trim/left");
+}
+
+trimright.onclick = e => {
+    postRequest("/trim/right");
+}
+
+speed.onchange = e => {postRequest("/speed", e.target.value)}
