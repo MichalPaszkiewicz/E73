@@ -6,7 +6,7 @@ Put client.html + client.js on a computer/controller.
 Edit the `serverUrl` in client.js to have the port of the R-PI instead of "localhost"
 
 
-Put package.json + server.js on the R-PI
+Put package.json, motor.js, robot.js && server.js on the R-PI
 
 
 Open a command prompt in the location of server.js on the R-PI
