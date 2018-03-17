@@ -1,6 +1,15 @@
 "use strict"
 
-class ControlPermutation{
+import {Motor} from "./motor";
+
+export class ControlPermutation{
+    forwardOn: boolean;
+    backwardOn: boolean;
+    leftOn: boolean;
+    rightOn: boolean;
+    leftMotorState: number;
+    rightMotorState: number;
+
     constructor(forwardOn, backwardOn,leftOn, rightOn, leftMotorState, rightMotorState){
         this.forwardOn = forwardOn;
         this.backwardOn = backwardOn;
@@ -25,7 +34,19 @@ class ControlPermutation{
     }
 }
 
-class Robot{
+export class Robot{
+    private _motor1: Motor;
+    private _motor2: Motor;
+    private _forwardOn: boolean;
+    private _backwardOn: boolean;
+    private _leftOn: boolean;
+    private _leftOff: boolean;
+    private _rightOn: boolean;
+    private _trimLeft: number;
+    private _trimRight: number;
+    private _trimIncrement: number;
+    private _speed: number;    
+
     constructor(motor1, motor2){
         this._motor1 = motor1;
         this._motor2 = motor2;
@@ -83,9 +104,9 @@ class Robot{
         var leftMotorVelocity = currentPermutation.leftMotorState * self._speed * (1 - self._trimLeft);
         var rightMotorVelocity = currentPermutation.rightMotorState * self._speed * (1 - self._trimRight);
 
-        console.print(`State: [${leftMotorVelocity}, ${rightMotorVelocity}]`);
-        console.print(`Trim: [${self._trimLeft}, ${self._trimRight}`);
-        console.print(`Speed: ${self._speed}`);
+        console.log(`State: [${leftMotorVelocity}, ${rightMotorVelocity}]`);
+        console.log(`Trim: [${self._trimLeft}, ${self._trimRight}`);
+        console.log(`Speed: ${self._speed}`);
 
         self._updateMotor(self._motor1, leftMotorVelocity);
         self._updateMotor(self._motor2, rightMotorVelocity);
@@ -144,7 +165,7 @@ class Robot{
     }
 
     leftOff(){
-        this.leftOn = false;
+        this._leftOn = false;
         this._updateMotors();
     }
 
@@ -167,5 +188,3 @@ class Robot{
         this._motor2.off();
     }   
 }
-
-exports.Robot = Robot;

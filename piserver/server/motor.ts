@@ -1,8 +1,16 @@
 "use strict"
 
-var Gpio = require('onoff').Gpio;
+import {Gpio} from 'onoff';
 
-class Motor{
+export class Motor{
+	private _pulseWidth: number;
+	private _pulses: number;
+	private _currentPulse: number;
+	private _speed: number;
+	private _enablePin: Gpio;
+	private _forwardPin: Gpio;
+	private _backwardPin: Gpio;
+
     constructor(enablePin, forwardPin, backwardPin){
 		this._pulseWidth = 5;
 		this._pulses = 100;
@@ -57,5 +65,3 @@ class Motor{
 		this._speed = newSpeed;
 	}
 }
-
-exports.Motor = Motor;

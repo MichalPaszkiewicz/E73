@@ -1,9 +1,9 @@
 "use strict"
 
-const http = require('http');
+import * as http from 'http';
 const port = 3000;
-var Motor = require("./motor");
-var Robot = require("./robot");
+import {Motor} from "./motor";
+import {Robot} from "./robot";
 
 var motor1 = new Motor(5,24,27);
 var motor2 = new Motor(17, 6, 22);

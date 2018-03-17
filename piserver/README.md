@@ -6,16 +6,17 @@ Put client.html + client.js on a computer/controller.
 Edit the `serverUrl` in client.js to have the port of the R-PI instead of "localhost"
 
 
-Put package.json, motor.js, robot.js && server.js on the R-PI
+Put the whole piserver folder on the R-PI
 
-
-Open a command prompt in the location of server.js on the R-PI
-
+Open a command prompt in the location of package.json on the R-PI
 
 run `npm install`
 
+run `npm install typescript -g`
 
-when finished, run `node server.js`
+run `tsc`
+
+when finished, run `node dist/server.js`
 
 
 open up client.html on the computer/controller.
