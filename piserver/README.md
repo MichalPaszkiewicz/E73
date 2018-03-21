@@ -1,4 +1,4 @@
-# HOW TO USE
+# Read Me, Please. Pleeeeeease
 
 Put client.html + client.js on a computer/controller.
 
@@ -36,8 +36,22 @@ you will need to install jest
 
 `npm install jest -g`
 
+You will probably need to install typescript locally
+
+`npm install typescript`
+
 `jest`
 
 You can run the tests while you code by running
 
 `jest --watchAll`
+
+## Simulation?
+
+There is an option for building and running a "simulation". This is essentially the same as the standard server, but does not require access to pins (so can be run on any machine).
+
+To set it up:
+
+run `tsc -p buildsimulation`
+
+run `node sim/simulation.js`
