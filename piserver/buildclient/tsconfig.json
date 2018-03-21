@@ -1,15 +1,14 @@
 {
     "compilerOptions": {
-        "outDir": "./dist/",
+        "outFile": "../client/client.js",
         "sourceMap": true,
         "noImplicitAny": false,
         "declaration": false,
-        "module": "commonjs",
+        "module": "system",
         "target": "es5",
-        "jsx": "react",
         "moduleResolution": "node"
     },
     "files": [
-        "./server/server.ts"
+        "../src/client.ts"
     ]
 }

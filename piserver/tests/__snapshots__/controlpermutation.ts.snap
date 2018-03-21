@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`toString method returns correct format for backward 1`] = `
+"     0
+  0     0
+     1"
+`;
+
+exports[`toString method returns correct format for backward left 1`] = `
+"     0
+  1     0
+     1"
+`;
+
+exports[`toString method returns correct format for backward right 1`] = `
+"     0
+  0     1
+     1"
+`;
+
+exports[`toString method returns correct format for forward 1`] = `
+"     1
+  0     0
+     0"
+`;
+
+exports[`toString method returns correct format for forward left 1`] = `
+"     1
+  1     0
+     0"
+`;
+
+exports[`toString method returns correct format for forward right 1`] = `
+"     1
+  0     1
+     0"
+`;
+
+exports[`toString method returns correct format for left 1`] = `
+"     0
+  1     0
+     0"
+`;
+
+exports[`toString method returns correct format for right 1`] = `
+"     0
+  0     1
+     0"
+`;

@@ -12,9 +12,11 @@ Open a command prompt in the location of package.json on the R-PI
 
 run `npm install`
 
-run `npm install typescript -g`
+If typescript is not installed (`tsc -v` returns error), run `npm install typescript -g`
 
-run `tsc`
+run `tsc -p buildclient`
+
+run `tsc -p buildserver`
 
 when finished, run `node dist/server.js`
 
@@ -26,3 +28,16 @@ Up and down arrow keys should move robot forwards + backwards, the slider in the
 
 
 If it is doing the opposite of what is expected, find the motor in server.js and switch the forward and backward pins (2nd and 3rd parameter in the motor constructors [lines 54 - 57]).
+
+
+## how to run tests
+
+you will need to install jest
+
+`npm install jest -g`
+
+`jest`
+
+You can run the tests while you code by running
+
+`jest --watchAll`

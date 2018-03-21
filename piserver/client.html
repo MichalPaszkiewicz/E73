@@ -10,6 +10,13 @@
 				<button id="trimleft">Trim Left</button>
 				<button id="trimright">Trim Right</button>
 		</div>
-		<script src="client.js"></script>
+		<div>
+			<canvas id="controlCanvas" height="400" width="400"></canvas>
+		</div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.21.0/system.js"></script>
+		<script src="./client/client.js"></script>
+		<script>
+			System.import("client")
+		</script>
 	</body>
 </html>

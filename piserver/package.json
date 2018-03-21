@@ -8,8 +8,20 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "rpi-gpio": "^0.9.1"
+    "onoff": "^2.0.0"
   },
   "author": "E73",
-  "license": "MIT"
+  "license": "MIT",
+  "jest": {
+        "moduleFileExtensions": [
+        "ts",
+        "js"
+        ],
+        "transform": {
+            "^.+\\.(ts)$": "<rootDir>/preprocessor.js"
+        },
+        "testMatch": [
+        "**/tests/**.(ts|js)"
+        ]
+  }
 }
