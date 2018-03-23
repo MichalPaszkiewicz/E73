@@ -101,11 +101,11 @@ test("the drive can be turned forwards with a command", () => {
     var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
     var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-    var commands = testTwoWheelDrive.getCommands();
+    var requestResponses = testTwoWheelDrive.getRequestResponses();
 
     var url = "/up/on";
 
-    commands.filter(c => c.url == url).forEach(c => c.response());
+    requestResponses.filter(c => c.url == url).forEach(c => c.response());
 
     expect(leftMotor.forwardPin.value()).toBe(1);
     expect(leftMotor.backwardPin.value()).toBe(0);
@@ -118,11 +118,11 @@ test("the drive can be turned backwards with a command", () => {
     var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
     var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-    var commands = testTwoWheelDrive.getCommands();
+    var requestResponses = testTwoWheelDrive.getRequestResponses();
 
     var url = "/down/on";
 
-    commands.filter(c => c.url == url).forEach(c => c.response());
+    requestResponses.filter(c => c.url == url).forEach(c => c.response());
 
     expect(leftMotor.forwardPin.value()).toBe(0);
     expect(leftMotor.backwardPin.value()).toBe(1);
@@ -135,11 +135,11 @@ test("the drive can be turned right with a command", () => {
     var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
     var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-    var commands = testTwoWheelDrive.getCommands();
+    var requestResponses = testTwoWheelDrive.getRequestResponses();
 
     var url = "/right/on";
 
-    commands.filter(c => c.url == url).forEach(c => c.response());
+    requestResponses.filter(c => c.url == url).forEach(c => c.response());
 
     expect(leftMotor.forwardPin.value()).toBe(1);
     expect(leftMotor.backwardPin.value()).toBe(0);
@@ -152,11 +152,11 @@ test("the drive can be turned left with a command", () => {
     var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
     var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-    var commands = testTwoWheelDrive.getCommands();
+    var requestResponses = testTwoWheelDrive.getRequestResponses();
 
     var url = "/left/on";
 
-    commands.filter(c => c.url == url).forEach(c => c.response());
+    requestResponses.filter(c => c.url == url).forEach(c => c.response());
 
     expect(leftMotor.forwardPin.value()).toBe(0);
     expect(leftMotor.backwardPin.value()).toBe(1);

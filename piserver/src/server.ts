@@ -17,7 +17,7 @@ var motor4 = motorFactory(25, 13, 18);
 var drive = new TwoWheelDrive(motor1, motor2);
 var robot = new Robot(drive);
 
-var httpService = new HttpService(port, robot.getCommands());
+var httpService = new HttpService(port, robot.getRequestResponses());
 
 process.on('SIGINT', () => {
 	robot.off();

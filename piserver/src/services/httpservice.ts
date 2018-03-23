@@ -1,10 +1,10 @@
-import {Command} from "../objects/command";
+import {RequestResponse} from "../objects/requestresponse";
 import * as http from 'http';
 import * as fs from "fs";
 
 export class HttpService{
 
-    constructor(port: number, commands: Command[]){
+    constructor(port: number, requestResponses: RequestResponse[]){
         var requestHandler = (request, response) => {
             var requestData = "";
             request.on("data", (chunk) => { requestData += chunk.toString() })
@@ -22,7 +22,7 @@ export class HttpService{
                     return;
                 }
                 var jsonData = !!requestData ? JSON.parse(requestData) : "";
-                commands.filter(rr => rr.url == request.url)
+                requestResponses.filter(rr => rr.url == request.url)
                     .forEach(rr => rr.response(jsonData));
                 response.writeHead(200, 'OK', { 'Content-Type': 'text/html' });
                 response.end('woop');

@@ -1,5 +1,7 @@
+import {IAmACommand} from "../interfaces/iamacommand";
 import {LearnableEvent} from "../objects/learnableevent";
 import {LearnableSequence} from "../objects/learnablesequence";
+import {ApplicationService} from "./applicationservice";
 
 export class LearningService{
 
@@ -10,6 +12,7 @@ export class LearningService{
     }
 
     private _learningModeOn: boolean = false;
+    private _applicationService: ApplicationService;
 
     currentSequence: LearnableSequence;
     currentSequenceStep: number = 0;
@@ -17,8 +20,8 @@ export class LearningService{
     currentLearningSequence: LearnableSequence;
     currentLearningSequenceTriggerTime: number = 0;
 
-    constructor(){
-
+    constructor(appService: ApplicationService){
+        this._applicationService = appService;
     }
 
     startLearning(sequenceName: string){
@@ -38,8 +41,8 @@ export class LearningService{
         this._learningModeOn = false;
     }
 
-    learn(action: () => void){
-        action();
+    learn(command: IAmACommand){
+        this._applicationService.handleCommand(command);
         if(!this._learningModeOn){
             return;
         }
@@ -47,13 +50,14 @@ export class LearningService{
         if(this.currentLearningSequence.events.length > 0){
             this.currentLearningSequence.events[this.currentLearningSequence.events.length - 1].waitTime = currentTime - this.currentLearningSequenceTriggerTime;
         }
-        this.currentLearningSequence.events.push(new LearnableEvent(action, 0));        
+        this.currentLearningSequence.events.push(new LearnableEvent(command, 0));        
         this.currentLearningSequenceTriggerTime = currentTime;
     }
 
     _runStep(){
         var self = this;
-        self.currentSequence.events[self.currentSequenceStep].action();
+        
+        self._applicationService.handleCommand(self.currentSequence.events[self.currentSequenceStep].command);
         if(self.currentSequenceStep >= self.currentSequence.events.length - 1){
             this.currentSequence = null;
             this.currentSequenceStep = 0;

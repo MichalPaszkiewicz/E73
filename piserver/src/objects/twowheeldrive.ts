@@ -1,5 +1,5 @@
 import {ISteerThings} from "../interfaces/isteerthings";
-import {Command} from "./command";
+import {RequestResponse} from "./requestresponse";
 import { IAmAMotor } from "../interfaces/iamamotor";
 import { ControlPermutation } from "./controlpermutation";
 
@@ -175,21 +175,21 @@ export class TwoWheelDrive implements ISteerThings {
         this._rightMotor.off();
     }
 
-    getCommands(): Command[] {
+    getRequestResponses(): RequestResponse[] {
         var self = this;
         return [
-            new Command("/left/on", () => self.left()),
-            new Command("/left/off", () => self.leftOff()),
-            new Command("/right/on", () => self.right()),
-            new Command("/right/off", () => self.rightOff()),
-            new Command("/up/on", () => self.forward()),
-            new Command("/up/off", () => self.forwardOff()),
-            new Command("/down/on", () => self.backward()),
-            new Command("/down/off", () => self.backwardOff()),
-            new Command("/trim/left", () => self.trimLeft()),
-            new Command("/trim/right", () => self.trimRight()),
-            new Command("/speed", (requestData) => self.setSpeed(requestData)),
-            new Command("/circle", (requestData) => self.setFullState(requestData))
+            new RequestResponse("/left/on", () => self.left()),
+            new RequestResponse("/left/off", () => self.leftOff()),
+            new RequestResponse("/right/on", () => self.right()),
+            new RequestResponse("/right/off", () => self.rightOff()),
+            new RequestResponse("/up/on", () => self.forward()),
+            new RequestResponse("/up/off", () => self.forwardOff()),
+            new RequestResponse("/down/on", () => self.backward()),
+            new RequestResponse("/down/off", () => self.backwardOff()),
+            new RequestResponse("/trim/left", () => self.trimLeft()),
+            new RequestResponse("/trim/right", () => self.trimRight()),
+            new RequestResponse("/speed", (requestData) => self.setSpeed(requestData)),
+            new RequestResponse("/circle", (requestData) => self.setFullState(requestData))
         ]
     }
 }

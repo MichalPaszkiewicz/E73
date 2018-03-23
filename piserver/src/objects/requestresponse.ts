@@ -1,4 +1,4 @@
-export class Command{
+export class RequestResponse{
     constructor(public url: string, public response: (data?: any) => void){
 
     }

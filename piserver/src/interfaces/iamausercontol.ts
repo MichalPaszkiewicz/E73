@@ -1,5 +1,5 @@
-import {Command} from "../objects/command";
+import {RequestResponse} from "../objects/requestresponse";
 
 export interface IAmAUserControl{
-    getCommands(): Command[];    
+    getRequestResponses(): RequestResponse[];    
 }

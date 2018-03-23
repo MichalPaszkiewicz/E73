@@ -1,5 +1,7 @@
+import {IAmACommand} from "../interfaces/iamacommand";
+
 export class LearnableEvent{
-    constructor(public action: () => void, public waitTime: number){
+    constructor(public command: IAmACommand, public waitTime: number){
 
     }
 } 

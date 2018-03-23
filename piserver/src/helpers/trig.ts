@@ -27,9 +27,6 @@ export var getCommand = (x, y) => {
 
     var speed = Math.min(1, Math.max(0, polarCoordinates.r - 50) / 100);
     
-    console.log("speed", speed);
-    console.log("angle", polarCoordinates.angle);
-
     var adjustments: PolarSpeedAdjustment[] = [
         new PolarSpeedAdjustment(-Math.PI / 2, true, false, true, false, (angle) => 4 * (angle + Math.PI) / Math.PI),
         new PolarSpeedAdjustment(0, false, true, true, false, (angle) => (- 4 * angle / Math.PI)),

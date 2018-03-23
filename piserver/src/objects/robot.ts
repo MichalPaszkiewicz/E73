@@ -8,8 +8,8 @@ export class Robot {
         this._drive = drive;
     }
 
-    getCommands(){
-        return this._drive.getCommands();
+    getRequestResponses(){
+        return this._drive.getRequestResponses();
     }
 
     off(){
