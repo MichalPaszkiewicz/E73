@@ -20,7 +20,7 @@ export var drawCircleControl = (context) => {
     context.fillText("[-1,1]", 25, 200);
     context.fillText("[-1,-1]", 200, 370);
     context.fillText("[1,0]", 330, 90);
-    context.fillText("[0,-1]", 330, 320);
-    context.fillText("[-1,0]", 70, 320);
+    context.fillText("[-1,0]", 330, 320);
+    context.fillText("[0,-1]", 70, 320);
     context.fillText("[0,1]", 70, 90);
 }

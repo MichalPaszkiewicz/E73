@@ -18,6 +18,8 @@ export class TwoWheelDrive implements ISteerThings {
     private _trimIncrement: number = 0.05;
     private _speed: number = 1;
     get speed(){return this._speed;};
+    private _speedDifference: number = 0.5;
+    get speedDifference(){return this._speedDifference;};
     private _loggers: ((msg:string) => void)[] = [];
 
     constructor(leftMotor: IAmAMotor, rightMotor: IAmAMotor) {
@@ -53,7 +55,7 @@ export class TwoWheelDrive implements ISteerThings {
 
     private _updateMotors() {
         var self = this;
-        var speedDifference = 0.5;
+        var speedDifference = this._speedDifference;
 
         // get untrimmed, unspecified motor velocities
         var controlPermutations = [
@@ -154,6 +156,16 @@ export class TwoWheelDrive implements ISteerThings {
         this._updateMotors();
     }
 
+    setFullState(data){
+        this._forwardOn = data.forwardOn;
+        this._backwardOn = data.backwardOn;
+        this._leftOn = data.leftOn;
+        this._rightOn = data.rightOn;
+        this._speed = data.speed;
+        this._speedDifference = data.speedDifference;
+        this._updateMotors();
+    }
+
     off() {
         this._forwardOn = false;
         this._backwardOn = false;
@@ -176,7 +188,8 @@ export class TwoWheelDrive implements ISteerThings {
             new Command("/down/off", () => self.backwardOff()),
             new Command("/trim/left", () => self.trimLeft()),
             new Command("/trim/right", () => self.trimRight()),
-            new Command("/speed", (requestData) => self.setSpeed(requestData))
+            new Command("/speed", (requestData) => self.setSpeed(requestData)),
+            new Command("/circle", (requestData) => self.setFullState(requestData))
         ]
     }
 }

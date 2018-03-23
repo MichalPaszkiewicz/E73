@@ -9,5 +9,5 @@ export var postRequest = (serverUrl: string, requestUrl: string, data?: any) => 
     console.log("posting: " + data + " to: " + requestUrl);
     var req = new XMLHttpRequest();
     req.open("POST", serverUrl + requestUrl, false);
-    req.send(data);
+    req.send(JSON.stringify(data));
 }

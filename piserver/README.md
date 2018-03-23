@@ -55,3 +55,12 @@ To set it up:
 run `tsc -p buildsimulation`
 
 run `node sim/simulation.js`
+
+
+## todo
+
+Check that direction of bottom area of circle is as required
+
+Permanent storage of learnt sequences?
+
+Drag response to circle interaction

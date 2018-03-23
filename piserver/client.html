@@ -1,17 +1,37 @@
 <html>
 	<head>
+			<meta name="viewport" content="400, initial-scale=1.0">
 	</head>
 	<body>
-		<div>
-			<span>Speed: </span>
-			<input id="speed" type="range" min=0 max=100 />
-		</div>
 		<div>
 				<button id="trimleft">Trim Left</button>
 				<button id="trimright">Trim Right</button>
 		</div>
 		<div>
 			<canvas id="controlCanvas" height="400" width="400"></canvas>
+		</div>
+		<style>
+			button{
+				background: #ff3513;
+				padding: 10px;
+				width: 45%;
+				border: none;
+				font-family: arial;
+				font-size: 20px;
+				cursor: pointer;
+				margin-bottom: 10px;
+			}
+			.hidden{
+				display: none;
+			}
+		</style>
+		<div id="myconsole"></div>
+		<div>
+			<button id="record">Record</button>
+			<button id="endrecord">End Recording</button>
+		</div>
+		<div id="sequences">
+
 		</div>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.21.0/system.js"></script>
 		<script src="./client/client.js"></script>
