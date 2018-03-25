@@ -7,6 +7,7 @@ import {TrimLeftCommand} from "./commands/trimleftcommand";
 import {TrimRightCommand} from "./commands/trimrightcommand";
 import {ClickCircleCommand} from "./commands/clickcirclecommand";
 import {LocalStorageService} from "./services/localstorageservice";
+import {TouchService} from "./services/touchservice";
 
 var learningService = new LearningService(clientApplicationService);
 const LEARNING_STORE_STRING = "LearntSequences";
@@ -45,7 +46,11 @@ document.onkeyup = e => tryKeySwitch(e.code, false);
 
 document.getElementById("trimleft").onclick = e => learningService.learn(new DirectionKeyCommand("/trim/left"));	
 document.getElementById("trimright").onclick = e => learningService.learn(new DirectionKeyCommand("/trim/right"));
+
 canvas.onclick = (e) => learningService.learn(new ClickCircleCommand(e.offsetX, e.offsetY));
+var touchService = new TouchService(canvas);
+touchService.registerOnTouchDownEvent((e) => learningService.learn(new ClickCircleCommand(e.offsetX, e.offsetY)));
+
 document.getElementById("record").onclick = e => learningService.startLearning(window.prompt("Please type the name of the new sequence"));
 
 function addSequenceButtons(){

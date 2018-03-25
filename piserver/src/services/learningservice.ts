@@ -78,6 +78,7 @@ export class LearningService{
         else{
             this.currentSequence = sequence;
         }
+        this.currentSequenceStep = 0;
         this._runStep();
     }
 
