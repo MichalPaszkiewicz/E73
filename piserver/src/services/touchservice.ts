@@ -15,10 +15,10 @@ export class TouchService{
 
     constructor(element: HTMLElement){
         this._element = element;
-        this._element.addEventListener("touchstart", (e) => this._handleStart(e), false);
-        this._element.addEventListener("touchend", (e) => this._handleEnd(e), false);
-        this._element.addEventListener("touchcancel", (e) => this._handleCancel(e), false);
-        this._element.addEventListener("touchmove", (e) => this._handleMove(e), false);
+        this._element.addEventListener("touchstart", (e) => this._handleStart(<TouchEvent>e), false);
+        this._element.addEventListener("touchend", (e) => this._handleEnd(<TouchEvent>e), false);
+        this._element.addEventListener("touchcancel", (e) => this._handleCancel(<TouchEvent>e), false);
+        this._element.addEventListener("touchmove", (e) => this._handleMove(<TouchEvent>e), false);
     }
 
     private _getTouchIndex(identifier: number): number{
