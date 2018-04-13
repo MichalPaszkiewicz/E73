@@ -5,7 +5,7 @@
         "noImplicitAny": false,
         "declaration": false,
         "module": "system",
-        "target": "es5",
+        "target": "es6",
         "moduleResolution": "node"
     },
     "files": [

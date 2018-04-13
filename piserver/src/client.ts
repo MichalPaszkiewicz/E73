@@ -1,73 +1,75 @@
 import {getRequest, postRequest} from "./helpers/httprequest";
 import {drawCircleControl} from "./drawings/circlecontrol";
 import {LearningService} from "./services/learningservice";
-import {clientApplicationService, canvas, ctx} from "./clientbindings";
+import {canvas, ctx, ctrlModule, learningModule} from "./clientbindings";
 import {DirectionKeyCommand} from "./commands/directionkeycommand";
 import {TrimLeftCommand} from "./commands/trimleftcommand";
 import {TrimRightCommand} from "./commands/trimrightcommand";
 import {ClickCircleCommand} from "./commands/clickcirclecommand";
 import {LocalStorageService} from "./services/localstorageservice";
 import {TouchService} from "./services/touchservice";
-
-var learningService = new LearningService(clientApplicationService);
-const LEARNING_STORE_STRING = "LearntSequences";
-var localStorageService = new LocalStorageService();
-var sequences = localStorageService.getItem(LEARNING_STORE_STRING);
-learningService.sequences = sequences || [];
+import { StartLearningCommand } from "./commands/startlearningcommand";
+import { EndLearningCommand } from "./commands/endlearningcommand";
+import { RunLearntSequenceCommand } from "./commands/runlearntsequencecommand";
 
 var keys = {};
 
-var setKeyState = (keyName, state, requestUrl) => {
+var setKeyState = (keyName, state) => {
     if (keys[keyName] === state) {
         return;
     }
 	keys[keyName] = state;
-    learningService.learn(new DirectionKeyCommand(requestUrl)); 
+    ctrlModule.handle(new DirectionKeyCommand(keyName, state)); 
 }
 
 var tryKeySwitch = (keyCode, value) => {
 	switch (keyCode) {
 		case "ArrowLeft":
-            setKeyState("left", value, "/left/" + (value ? "on" : "off"));
+            setKeyState("left", value);
             break;
         case "ArrowRight":
-            setKeyState("right", value, "/right/" + (value ? "on" : "off"));
+            setKeyState("right", value);
             break;
         case "ArrowUp":
-            setKeyState("up", value, "/up/" + (value ? "on" : "off"));
+            setKeyState("up", value);
             break;
         case "ArrowDown":
-            setKeyState("down", value, "/down/" + (value ? "on" : "off"));
+            setKeyState("down", value);
     }
 }
 
 document.onkeydown = e => tryKeySwitch(e.code, true);
 document.onkeyup = e => tryKeySwitch(e.code, false);
 
-document.getElementById("trimleft").onclick = e => learningService.learn(new DirectionKeyCommand("/trim/left"));	
-document.getElementById("trimright").onclick = e => learningService.learn(new DirectionKeyCommand("/trim/right"));
+document.getElementById("trimleft").onclick = e => ctrlModule.handle(new TrimLeftCommand());	
+document.getElementById("trimright").onclick = e => ctrlModule.handle(new TrimRightCommand());
 
-canvas.onclick = (e) => learningService.learn(new ClickCircleCommand(e.offsetX, e.offsetY));
+canvas.onclick = (e) => ctrlModule.handle(new ClickCircleCommand(e.offsetX, e.offsetY));
 var touchService = new TouchService(canvas);
-touchService.registerOnTouchDownEvent((e) => learningService.learn(new ClickCircleCommand(e.offsetX, e.offsetY)));
+touchService.registerOnTouchDownEvent((e) => ctrlModule.handle(new ClickCircleCommand(e.offsetX, e.offsetY)));
 
-document.getElementById("record").onclick = e => learningService.startLearning(window.prompt("Please type the name of the new sequence"));
+document.getElementById("record").onclick = e => {
+    var name = window.prompt("Please type the name of the new sequence");
+    ctrlModule.handle(new StartLearningCommand(name));
+    sequences.push(name);
+};
+
+var sequences = [];
 
 function addSequenceButtons(){
     var sequenceDiv = document.getElementById("sequences");
     sequenceDiv.innerHTML = "";
-    learningService.getSequenceNames().forEach(sn => {
+    sequences.forEach(sn => {
         var newButton = document.createElement("button");
         newButton.innerText = sn;
-        newButton.onclick = (e) => learningService.run((<HTMLElement>e.target).innerText);
+        newButton.onclick = (e) => ctrlModule.handle(new RunLearntSequenceCommand((<HTMLElement>e.target).innerText));
         sequenceDiv.appendChild(newButton); 
     })
 }
 
 document.getElementById("endrecord").onclick = e => {
-    learningService.endLearning();
+    ctrlModule.handle(new EndLearningCommand());
     addSequenceButtons();
-    localStorageService.saveItem(LEARNING_STORE_STRING, learningService.sequences);
 }
 
 drawCircleControl(ctx);

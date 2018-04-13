@@ -1,10 +1,16 @@
-import {RequestResponse} from "../objects/requestresponse";
 import * as http from 'http';
 import * as fs from "fs";
+import { IAmAUserInterface } from '../framework/interfaces/iamauserinterface';
+import { IAmACommand } from '../framework/interfaces/iamacommand';
+import { IAmARobotEvent } from '../framework/interfaces/iamarobotevent';
 
-export class HttpService{
+export class HttpService implements IAmAUserInterface{
 
-    constructor(port: number, requestResponses: RequestResponse[]){
+    private _onCommanded: (command: IAmACommand) => void;
+    unFetchedEvents: IAmARobotEvent[] = [];
+
+    constructor(port: number){
+        var self = this;
         var requestHandler = (request, response) => {
             var requestData = "";
             request.on("data", (chunk) => { requestData += chunk.toString() })
@@ -21,9 +27,18 @@ export class HttpService{
                     response.end(content, 'utf-8');
                     return;
                 }
+                if(request.url.indexOf("events") > 0){
+                    var content = JSON.stringify(self.unFetchedEvents);
+                    self.unFetchedEvents = [];                    
+                    response.writeHead(200, "ok", {"Content-Type": "application/json"});
+                    response.end(content, "utf-8");
+                    return;
+                }
                 var jsonData = !!requestData ? JSON.parse(requestData) : "";
-                requestResponses.filter(rr => rr.url == request.url)
-                    .forEach(rr => rr.response(jsonData));
+                var command = <IAmACommand>jsonData;
+
+                self._onCommanded(command);
+
                 response.writeHead(200, 'OK', { 'Content-Type': 'text/html' });
                 response.end('woop');
             });
@@ -42,5 +57,13 @@ export class HttpService{
             }
             console.log(`server is listening on ${port}`)
         });
+    }
+
+    registerOnCommanded(callback: (command: IAmACommand) => void) {
+        this._onCommanded = callback;
+    }
+
+    applyEvent(event: IAmARobotEvent){
+        this.unFetchedEvents.push(event);
     }
 }

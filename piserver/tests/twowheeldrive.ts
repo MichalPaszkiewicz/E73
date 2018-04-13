@@ -1,166 +1,108 @@
-import {Motor} from "../src/objects/motor";
+import {Motor} from "../src/hats/motozero/motor";
 import {FakePin, fakePinFactory} from "../src/services/fakepinfactory";
-import {TwoWheelDrive} from "../src/objects/twowheeldrive";
+import {TwoWheelDrive} from "../src/aggregateroots/twowheeldrive";
+import { MotorSpeedSetEvent, MOTOR_SPEED_SET_EVENT_NAME } from "../src/hats/motozero/events/motorspeedsetevent";
 
 
 test("turning drive forwards turns forward both wheels", () => {
 
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
+    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
+    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
+    var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.forward();
 
-    expect(leftMotor.forwardPin.value()).toBe(1);
-    expect(leftMotor.backwardPin.value()).toBe(0);
-
-    expect(rightMotor.forwardPin.value()).toBe(1);
-    expect(rightMotor.backwardPin.value()).toBe(0);
+    expect(testTwoWheelDrive.unprocessedEvents.length).toBe(2);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd: MotorSpeedSetEvent) => t2wd.motorId == "leftMotor")
+        .length).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd: MotorSpeedSetEvent) => t2wd.motorId == "rightMotor")
+        .length).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd => t2wd.name == MOTOR_SPEED_SET_EVENT_NAME))
+        .length).toBe(2);
 });
 
 test("turning drive backwards turns both wheels backwards", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
+    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
+    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
+    var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.backward();
 
-    expect(leftMotor.forwardPin.value()).toBe(0);
-    expect(leftMotor.backwardPin.value()).toBe(1);
-
-    expect(rightMotor.forwardPin.value()).toBe(0);
-    expect(rightMotor.backwardPin.value()).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents.length).toBe(2);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd: MotorSpeedSetEvent) => t2wd.motorId == "leftMotor")
+        .length).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd: MotorSpeedSetEvent) => t2wd.motorId == "rightMotor")
+        .length).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter(t2wd => t2wd.name == MOTOR_SPEED_SET_EVENT_NAME)
+        .length).toBe(2);
 });
 
 test("turning drive right sets directions correctly", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
+    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
+    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
+    var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.right();
 
-    expect(leftMotor.forwardPin.value()).toBe(1);
-    expect(leftMotor.backwardPin.value()).toBe(0);
-
-    expect(rightMotor.forwardPin.value()).toBe(0);
-    expect(rightMotor.backwardPin.value()).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents.length).toBe(2);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd: MotorSpeedSetEvent) => t2wd.motorId == "leftMotor")
+        .length).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd: MotorSpeedSetEvent) => t2wd.motorId == "rightMotor")
+        .length).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter(t2wd => t2wd.name == MOTOR_SPEED_SET_EVENT_NAME)
+        .length).toBe(2);
 });
 
 test("turning drive left sets directions correctly", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
+    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
+    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
+    var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.left();
 
-    expect(leftMotor.forwardPin.value()).toBe(0);
-    expect(leftMotor.backwardPin.value()).toBe(1);
-
-    expect(rightMotor.forwardPin.value()).toBe(1);
-    expect(rightMotor.backwardPin.value()).toBe(0);
+    expect(testTwoWheelDrive.unprocessedEvents.length).toBe(2);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd: MotorSpeedSetEvent) => t2wd.motorId == "leftMotor")
+        .length).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter((t2wd: MotorSpeedSetEvent) => t2wd.motorId == "rightMotor")
+        .length).toBe(1);
+    expect(testTwoWheelDrive.unprocessedEvents
+        .filter(t2wd => t2wd.name == MOTOR_SPEED_SET_EVENT_NAME)
+        .length).toBe(2);
 });
 
 test("trim left trims the left motor", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
+    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
+    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
+    var testTwoWheelDrive = new TwoWheelDrive();
 
+    testTwoWheelDrive.forward();
     testTwoWheelDrive.trimLeft();
 
-    expect(testTwoWheelDrive.leftTrim).toBe(0.05);
+    expect(testTwoWheelDrive.unprocessedEvents.length).toBe(4);
+
+    expect(testTwoWheelDrive.getLeftTrim()).toBe(0.05);
 });
 
 test("trim right trims the right motor", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
+    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
+    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
+    var testTwoWheelDrive = new TwoWheelDrive();
 
+    testTwoWheelDrive.forward();    
     testTwoWheelDrive.trimRight();
 
-    expect(testTwoWheelDrive.rightTrim).toBe(0.05);
-});
+    expect(testTwoWheelDrive.unprocessedEvents.length).toBe(4);    
 
-test("the drive can be turned off", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-
-    testTwoWheelDrive.forward();
-    testTwoWheelDrive.off();
-
-    expect(leftMotor.forwardPin.value()).toBe(0);
-    expect(leftMotor.backwardPin.value()).toBe(0);
-    
-    expect(rightMotor.forwardPin.value()).toBe(0);
-    expect(rightMotor.backwardPin.value()).toBe(0);
-    
-    expect(leftMotor.speed).toBe(0);
-});
-
-test("the drive can be turned forwards with a command", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-    var requestResponses = testTwoWheelDrive.getRequestResponses();
-
-    var url = "/up/on";
-
-    requestResponses.filter(c => c.url == url).forEach(c => c.response());
-
-    expect(leftMotor.forwardPin.value()).toBe(1);
-    expect(leftMotor.backwardPin.value()).toBe(0);
-
-    expect(rightMotor.forwardPin.value()).toBe(1);
-    expect(rightMotor.backwardPin.value()).toBe(0);
-});
-
-test("the drive can be turned backwards with a command", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-    var requestResponses = testTwoWheelDrive.getRequestResponses();
-
-    var url = "/down/on";
-
-    requestResponses.filter(c => c.url == url).forEach(c => c.response());
-
-    expect(leftMotor.forwardPin.value()).toBe(0);
-    expect(leftMotor.backwardPin.value()).toBe(1);
-
-    expect(rightMotor.forwardPin.value()).toBe(0);
-    expect(rightMotor.backwardPin.value()).toBe(1);
-});
-
-test("the drive can be turned right with a command", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-    var requestResponses = testTwoWheelDrive.getRequestResponses();
-
-    var url = "/right/on";
-
-    requestResponses.filter(c => c.url == url).forEach(c => c.response());
-
-    expect(leftMotor.forwardPin.value()).toBe(1);
-    expect(leftMotor.backwardPin.value()).toBe(0);
-
-    expect(rightMotor.forwardPin.value()).toBe(0);
-    expect(rightMotor.backwardPin.value()).toBe(1);
-});
-
-test("the drive can be turned left with a command", () => {
-    var leftMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>(1,2,3,fakePinFactory);
-    var testTwoWheelDrive = new TwoWheelDrive(leftMotor, rightMotor);
-    var requestResponses = testTwoWheelDrive.getRequestResponses();
-
-    var url = "/left/on";
-
-    requestResponses.filter(c => c.url == url).forEach(c => c.response());
-
-    expect(leftMotor.forwardPin.value()).toBe(0);
-    expect(leftMotor.backwardPin.value()).toBe(1);
-
-    expect(rightMotor.forwardPin.value()).toBe(1);
-    expect(rightMotor.backwardPin.value()).toBe(0);
+    expect(testTwoWheelDrive.getRightTrim()).toBe(0.05);
 });

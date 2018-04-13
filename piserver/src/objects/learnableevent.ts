@@ -1,7 +1,7 @@
-import {IAmACommand} from "../interfaces/iamacommand";
+import {IAmARobotEvent} from "../framework/interfaces/iamarobotevent";
 
 export class LearnableEvent{
-    constructor(public command: IAmACommand, public waitTime: number){
+    constructor(public robotEvent: IAmARobotEvent, public waitTime: number){
 
     }
 } 

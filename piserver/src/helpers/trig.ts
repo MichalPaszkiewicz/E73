@@ -1,3 +1,5 @@
+import { SetFullStateCommand } from "../commands/setfullstatecommand";
+
 export var toPolarCoordinates = (x, y) => {
         var sideLength = 400;
         var middlePoint = {x: sideLength/2, y: sideLength/2};
@@ -21,7 +23,7 @@ class PolarSpeedAdjustment{
         }
 }
 
-export var getCommand = (x, y) => {
+export var getCommand: (x, y) => SetFullStateCommand = (x, y) => {
 
     var polarCoordinates = toPolarCoordinates(x, y);
 
@@ -47,5 +49,10 @@ export var getCommand = (x, y) => {
         }
     }
 
-    return result;
+    return new SetFullStateCommand(result.forwardOn,
+            result.backwardOn,
+            result.leftOn,
+            result.rightOn,
+            result.speed,
+            result.speedDifference);
 }

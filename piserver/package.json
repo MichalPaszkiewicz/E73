@@ -8,20 +8,25 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "onoff": "^2.0.0"
+    "onoff": "^2.0.0",
+    "typescript": "^2.8.1",
+    "node-blinkt": "^1.0.3"
   },
   "author": "E73",
   "license": "MIT",
   "jest": {
-        "moduleFileExtensions": [
-        "ts",
-        "js"
-        ],
-        "transform": {
-            "^.+\\.(ts)$": "<rootDir>/preprocessor.js"
-        },
-        "testMatch": [
-        "**/tests/**.(ts|js)"
-        ]
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts)$": "<rootDir>/preprocessor.js"
+    },
+    "testMatch": [
+      "**/tests/**.(ts|js)"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^9.6.4"
   }
 }

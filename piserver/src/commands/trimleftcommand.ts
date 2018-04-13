@@ -1,4 +1,4 @@
-import {IAmACommand} from "../interfaces/iamacommand";
+import {IAmACommand} from "../framework/interfaces/iamacommand";
 
 export var TRIM_LEFT_COMMAND_NAME = "TrimLeft";
 

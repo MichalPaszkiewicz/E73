@@ -1,4 +1,4 @@
-import {ControlPermutation} from "../src/objects/controlpermutation";
+import {ControlPermutation} from "../src/aggregateroots/controlpermutation";
 
 test("toString method returns correct format for forward", () => {
 

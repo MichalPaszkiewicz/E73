@@ -1,4 +1,4 @@
-import {IAmACommand} from "../interfaces/iamacommand";
+import {IAmACommand} from "../framework/interfaces/iamacommand";
 
 export var CLICK_CIRCLE_COMMAND_NAME = "ClickCircle";
 

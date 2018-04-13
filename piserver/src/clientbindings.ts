@@ -1,44 +1,54 @@
-import {DirectionKeyCommandHandler} from "./commandhandlers/directionkeycommandhandler";
-import {TrimLeftCommandHandler} from "./commandhandlers/trimleftcommandhandler";
-import {TrimRightCommandHandler} from "./commandhandlers/trimrightcommandhandler";
-import {ClickCircleCommandHandler} from "./commandhandlers/clickcirclecommandhandler";
-import {ApplicationService} from "./services/applicationservice";
-import {fakeMotorFactory} from "./services/fakemotorfactory";
-import {TwoWheelDrive} from "./objects/twowheeldrive";
+import {fakeMotorFactory} from "./hats/motozero/fakemotorfactory";
+import {TwoWheelDrive} from "./aggregateroots/twowheeldrive";
 import {Robot} from "./objects/robot";
+import { DefaultControlModule } from "./framework/services/defaultcontrolmodule";
+import { DefaultDomainService } from "./framework/services/defaultdomainservice";
+import { LearningService } from "./services/learningservice";
+import { LocalStorageService } from "./services/localstorageservice";
+import { FrontEndCommandHandler } from "./commandhandlers/frontendcommandhandler";
 
-var motor1 = fakeMotorFactory(5, 24, 27);
-var motor2 = fakeMotorFactory(17, 6, 22);
-var motor3 = fakeMotorFactory(12, 23, 16);
-var motor4 = fakeMotorFactory(25, 13, 18);
+var motor1 = fakeMotorFactory("motor1", 5, 24, 27);
+var motor2 = fakeMotorFactory("motor2", 17, 6, 22);
+var motor3 = fakeMotorFactory("motor3", 12, 23, 16);
+var motor4 = fakeMotorFactory("motor4", 25, 13, 18);
 
-var drive = new TwoWheelDrive(motor1, motor2);
+var domainService = new DefaultDomainService();
+var controlModule = new DefaultControlModule(domainService);
 
-drive.attachLogger((msg) => {
-    var box = document.getElementById("myconsole");
-    var pre = document.createElement("pre");
-    pre.innerText = msg;
-    box.appendChild(pre);
-    if(box.childElementCount > 4){
-        var firstChild = box.firstChild;
-        box.removeChild(firstChild);
-    }
-});
-
-var robot = new Robot(drive);
+var robot = new Robot(controlModule, [], []);
 
 var serverUrl = window.location.origin;
-
-var appService = new ApplicationService();
 
 var cvs = <HTMLCanvasElement>document.getElementById("controlCanvas");
 var context = cvs.getContext("2d");
 
-appService.registerCommandHandler(new DirectionKeyCommandHandler(serverUrl, robot));
-appService.registerCommandHandler(new TrimLeftCommandHandler(serverUrl, robot));
-appService.registerCommandHandler(new TrimRightCommandHandler(serverUrl, robot));
-appService.registerCommandHandler(new ClickCircleCommandHandler(serverUrl, robot, context))
+controlModule.registerCommandHandler(new FrontEndCommandHandler(serverUrl, context));
 
-export var clientApplicationService = appService;
+const LEARNING_STORE_STRING = "LearntSequences";
+var localStorageService = new LocalStorageService();
+var sequences = localStorageService.getItem(LEARNING_STORE_STRING);
+
+var learningService;
+
+controlModule.registerCommandHandler({
+	handles: [
+		"*"
+	],
+	handle: (command, domainService) => {
+		domainService.getAggregateRoot(LearningService, (ar) =>{
+            learningService = ar;
+            ar.sequences = ar.sequences.length > 0 ? ar.sequences : sequences || [];
+            ar.registerOnSequenceAdded((s) => {
+                localStorageService.saveItem(LEARNING_STORE_STRING, ar.sequences);    
+            });
+			ar.handle(command);
+            ar.attachToControlModule(controlModule);
+		});
+		return [];
+	}
+});
+
+export var learningModule = learningService;
+export var ctrlModule = controlModule;
 export var canvas = cvs;
 export var ctx = context;
