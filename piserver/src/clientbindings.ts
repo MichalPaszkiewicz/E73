@@ -28,24 +28,11 @@ const LEARNING_STORE_STRING = "LearntSequences";
 var localStorageService = new LocalStorageService();
 var sequences = localStorageService.getItem(LEARNING_STORE_STRING);
 
-var learningService;
-
-controlModule.registerCommandHandler({
-	handles: [
-		"*"
-	],
-	handle: (command, domainService) => {
-		domainService.getAggregateRoot(LearningService, (ar) =>{
-            learningService = ar;
-            ar.sequences = ar.sequences.length > 0 ? ar.sequences : sequences || [];
-            ar.registerOnSequenceAdded((s) => {
-                localStorageService.saveItem(LEARNING_STORE_STRING, ar.sequences);    
-            });
-			ar.handle(command);
-            ar.attachToControlModule(controlModule);
-		});
-		return [];
-	}
+var learningService = new LearningService();
+learningService.attachToControlModule(controlModule);
+learningService.sequences = sequences || [];
+learningService.registerOnSequenceAdded((s) => {
+	localStorageService.saveItem(LEARNING_STORE_STRING, learningService.sequences);
 });
 
 export var learningModule = learningService;

@@ -1,5 +1,5 @@
-import { IAmARobotEventHandler } from "../framework/interfaces/iamaroboteventhandler";
-import { IAmARobotEvent } from "../framework/interfaces/iamarobotevent";
+import { IAmARobotEventHandler } from "../../framework/interfaces/iamaroboteventhandler";
+import { IAmARobotEvent } from "../../framework/interfaces/iamarobotevent";
 import { BlinktClearedEvent, BLINKT_CLEARED_EVENT_NAME } from "./events/blinktclearedevent";
 import { BLINKT_ALL_PIXELS_SET_EVENT_NAME, BlinktAllPixelsSetEvent } from "./events/blinktallpixelssetevent";
 import { BlinktPixelSetEvent, BLINKT_PIXEL_SET_EVENT_NAME } from "./events/blinktpixelsetevent";

@@ -32,18 +32,8 @@ controlModule.registerCommandHandler(new TwoWheelDriveCommandHandler());
 
 controlModule.registerRobotEventHandler(new LogEventHandler());
 
-controlModule.registerCommandHandler({
-	handles: [
-		"*"
-	],
-	handle: (command, domainService) => {
-		domainService.getAggregateRoot(LearningService, (ar) =>{
-			ar.handle(command);
-			ar.attachToControlModule(controlModule);
-		});
-		return [];
-	}
-});
+var learningService = new LearningService();
+learningService.attachToControlModule(controlModule);
 
 //for logging commands
 // controlModule.registerCommandHandler({

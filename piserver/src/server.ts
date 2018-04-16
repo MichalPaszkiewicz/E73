@@ -12,6 +12,7 @@ import { DefaultDomainService } from "./framework/services/defaultdomainservice"
 import { DefaultControlModule } from "./framework/services/defaultcontrolmodule";
 import { MotorEventHandler } from "./hats/motozero/motoreventhandler";
 import { TwoWheelDriveCommandHandler } from "./commandhandlers/twowheeldrivecommandhandler";
+import { LearningService } from "./services/learningservice";
 
 var motor1 = motorFactory("motor1", 5, 24, 27);
 var motor2 = motorFactory("motor2", 17, 6, 22);
@@ -24,6 +25,9 @@ var domainService = new DefaultDomainService();
 var controlModule = new DefaultControlModule(domainService);
 controlModule.registerRobotEventHandler(motorEventHandler);
 controlModule.registerCommandHandler(new TwoWheelDriveCommandHandler());
+
+var learningService = new LearningService();
+learningService.attachToControlModule(controlModule);
 
 var httpService = new HttpService(port);
 

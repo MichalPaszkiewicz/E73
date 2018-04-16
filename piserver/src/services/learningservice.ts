@@ -8,12 +8,45 @@ import { IAmASensation } from "../framework/interfaces/iamasensation";
 import { START_LEARNING_COMMAND_NAME, StartLearningCommand } from "../commands/startlearningcommand";
 import { END_LEARNING_COMMAND_NAME, EndLearningCommand } from "../commands/endlearningcommand";
 import { RUN_LEARNT_SEQUENCE_COMMAND_NAME, RunLearntSequenceCommand } from "../commands/runlearntsequencecommand";
+import { IAmACommandHandler } from "../framework/interfaces/iamacommandhandler";
+import { IAmADomainService } from "../framework/interfaces/iamadomainservice";
+import { IAmARobotEventHandler } from "../framework/interfaces/iamaroboteventhandler";
 
 type SequenceFunc = (sequence: LearnableSequence) => void;
 
-export class LearningService implements IAmAnAggregateRoot{
+class LearningServiceCommandHandler implements IAmACommandHandler {
+    handles: string[] = [
+        START_LEARNING_COMMAND_NAME,
+        END_LEARNING_COMMAND_NAME,
+        RUN_LEARNT_SEQUENCE_COMMAND_NAME
+    ];
+    private _onHandle: (command: IAmACommand) => void;
+    registerOnHandle(callback: (command: IAmACommand) => void){
+        this._onHandle = (c: IAmACommand) => callback(c);
+    }
+    handle(trigger: IAmACommand, domainService: IAmADomainService): IAmARobotEvent[] {
+        if(this._onHandle){
+            this._onHandle(trigger);
+        }
+        return [];
+    }
+}
 
-    id?: string;
+class LearningServiceEventHandler implements IAmARobotEventHandler {
+    handles: string[] = ["*"];
+    private _onHandle: (robotEvent: IAmARobotEvent) => void;
+    registerOnHandle(callback: (robotEvent: IAmARobotEvent) => void){
+        this._onHandle = (c: IAmACommand) => callback(c);
+    }
+    handle(robotEvent: IAmARobotEvent) {
+        if(this._onHandle){
+            this._onHandle(robotEvent);
+        }
+    }
+}
+
+export class LearningService{
+
     handle(command: IAmACommand): IAmARobotEvent[] {
         var self = this;
         var robotEvents = []
@@ -35,12 +68,7 @@ export class LearningService implements IAmAnAggregateRoot{
         }
         return robotEvents;
     }
-    sense(sensation: IAmASensation): IAmARobotEvent[] {
-        throw new Error("Method not implemented.");
-    }
-    apply(robotEvent: IAmARobotEvent) {
-        this.learn(robotEvent);
-    }
+    
     sequences: LearnableSequence[] = [];
     private _onSequenceAddedFuncs: SequenceFunc[] = [];
     applyEvent: (robotEvent: IAmARobotEvent) => void;
@@ -48,7 +76,12 @@ export class LearningService implements IAmAnAggregateRoot{
     attachToControlModule(controlModule: IAmAControlModule){
         var self = this;
         self.applyEvent = (e) => controlModule.signal(e);
-        // is this a good idea, or make this a command handler?
+        var ch = new LearningServiceCommandHandler();
+        ch.registerOnHandle((c) => {self.handle(c)});
+        controlModule.registerCommandHandler(ch);
+        var eh = new LearningServiceEventHandler();
+        eh.registerOnHandle((e) => self.learn(e));
+        controlModule.registerRobotEventHandler(eh);
     }
 
     getSequenceNames(): string[] {
@@ -71,6 +104,9 @@ export class LearningService implements IAmAnAggregateRoot{
 
     endLearning() {
         var currentTime = (new Date()).getTime();
+        if(!this.currentLearningSequence){
+            return;
+        }
         if (this.currentLearningSequence.events.length > 0) {
             this.currentLearningSequence.events[this.currentLearningSequence.events.length - 1].waitTime = currentTime - this.currentLearningSequenceTriggerTime;
         }
@@ -102,15 +138,17 @@ export class LearningService implements IAmAnAggregateRoot{
 
     private _runStep() {
         var self = this;
+        
+        self.applyEvent(self.currentSequence.events[self.currentSequenceStep].robotEvent);
+        self.currentSequenceStep++;
 
-        if (self.currentSequenceStep >= self.currentSequence.events.length - 1) {
+        if (self.currentSequenceStep > self.currentSequence.events.length - 1) {
             this.currentSequence = null;
             this.currentSequenceStep = 0;
             return;
         }
-        self.applyEvent(self.currentSequence.events[self.currentSequenceStep].robotEvent);
-        self.currentSequenceStep++;
-        setTimeout(() => self._runStep(), self.currentSequence.events[self.currentSequenceStep].waitTime);
+
+        setTimeout(() => self._runStep(), self.currentSequence.events[self.currentSequenceStep - 1].waitTime);
     }
 
     run(sequence: string | LearnableSequence) {
