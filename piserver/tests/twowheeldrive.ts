@@ -2,12 +2,11 @@ import {Motor} from "../src/hats/motozero/motor";
 import {FakePin, fakePinFactory} from "../src/services/fakepinfactory";
 import {TwoWheelDrive} from "../src/aggregateroots/twowheeldrive";
 import { MotorSpeedSetEvent, MOTOR_SPEED_SET_EVENT_NAME } from "../src/hats/motozero/events/motorspeedsetevent";
+import { LineFoundSensation } from "../src/hats/linesensor/sensations/linefoundsensation";
+import { LineLostSensation } from "../src/hats/linesensor/sensations/linelostsensation";
 
 
 test("turning drive forwards turns forward both wheels", () => {
-
-    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.forward();
@@ -25,8 +24,6 @@ test("turning drive forwards turns forward both wheels", () => {
 });
 
 test("turning drive backwards turns both wheels backwards", () => {
-    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.backward();
@@ -44,8 +41,6 @@ test("turning drive backwards turns both wheels backwards", () => {
 });
 
 test("turning drive right sets directions correctly", () => {
-    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.right();
@@ -63,8 +58,6 @@ test("turning drive right sets directions correctly", () => {
 });
 
 test("turning drive left sets directions correctly", () => {
-    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.left();
@@ -82,8 +75,6 @@ test("turning drive left sets directions correctly", () => {
 });
 
 test("trim left trims the left motor", () => {
-    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.forward();
@@ -95,8 +86,6 @@ test("trim left trims the left motor", () => {
 });
 
 test("trim right trims the right motor", () => {
-    var leftMotor = new Motor<FakePin>("leftMotor", 1,2,3,fakePinFactory);
-    var rightMotor = new Motor<FakePin>("rightMotor", 1,2,3,fakePinFactory);
     var testTwoWheelDrive = new TwoWheelDrive();
 
     testTwoWheelDrive.forward();    
@@ -105,4 +94,22 @@ test("trim right trims the right motor", () => {
     expect(testTwoWheelDrive.unprocessedEvents.length).toBe(4);    
 
     expect(testTwoWheelDrive.getRightTrim()).toBe(0.05);
+});
+
+test("line found on single line tracker shifts drive left", () => {
+    var twoWheelDrive = new TwoWheelDrive();
+
+    var events = twoWheelDrive.sense(new LineFoundSensation(0, 1));
+    events.forEach(e => twoWheelDrive.apply(e));
+
+    expect(twoWheelDrive._leftMotorVelocity).toBeLessThan(twoWheelDrive._rightMotorVelocity);
+});
+
+test("line lost on single line tracker shifts drive right", () => {
+    var twoWheelDrive = new TwoWheelDrive();
+
+    var events = twoWheelDrive.sense(new LineLostSensation(0, 1));
+    events.forEach(e => twoWheelDrive.apply(e));
+
+    expect(twoWheelDrive._rightMotorVelocity).toBeLessThan(twoWheelDrive._leftMotorVelocity);
 });

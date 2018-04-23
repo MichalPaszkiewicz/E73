@@ -36,6 +36,7 @@ export class FakePin implements IAmAPin{
     }
 
     triggerWatch(err: Error, value: 0 | 1){
+        this._value = value;
         this._watch(err, value);
     }
 }

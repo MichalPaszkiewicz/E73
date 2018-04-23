@@ -18,7 +18,8 @@ class LearningServiceCommandHandler implements IAmACommandHandler {
     handles: string[] = [
         START_LEARNING_COMMAND_NAME,
         END_LEARNING_COMMAND_NAME,
-        RUN_LEARNT_SEQUENCE_COMMAND_NAME
+        RUN_LEARNT_SEQUENCE_COMMAND_NAME,
+        "*"
     ];
     private _onHandle: (command: IAmACommand) => void;
     registerOnHandle(callback: (command: IAmACommand) => void){
@@ -64,11 +65,13 @@ export class LearningService{
                 self.run(runSequence.sequenceName);
                 break;
             default:
+                self.stopRunning();
                 break;
         }
         return robotEvents;
     }
     
+    private _running: boolean = false;
     sequences: LearnableSequence[] = [];
     private _onSequenceAddedFuncs: SequenceFunc[] = [];
     applyEvent: (robotEvent: IAmARobotEvent) => void;
@@ -138,6 +141,10 @@ export class LearningService{
 
     private _runStep() {
         var self = this;
+
+        if(!this._running){
+            return;
+        }
         
         self.applyEvent(self.currentSequence.events[self.currentSequenceStep].robotEvent);
         self.currentSequenceStep++;
@@ -148,7 +155,9 @@ export class LearningService{
             return;
         }
 
-        setTimeout(() => self._runStep(), self.currentSequence.events[self.currentSequenceStep - 1].waitTime);
+        if(self.currentSequence && this._running){
+            setTimeout(() => self._runStep(), self.currentSequence.events[self.currentSequenceStep - 1].waitTime);
+        }
     }
 
     run(sequence: string | LearnableSequence) {
@@ -163,7 +172,11 @@ export class LearningService{
             this.currentSequence = sequence;
         }
         this.currentSequenceStep = 0;
+        this._running = true;
         this._runStep();
     }
 
+    stopRunning(){
+        this._running = false;
+    }
 }

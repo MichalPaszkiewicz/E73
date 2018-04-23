@@ -8,9 +8,13 @@ import { TRIM_LEFT_COMMAND_NAME } from "../commands/trimleftcommand";
 import { TRIM_RIGHT_COMMAND_NAME } from "../commands/trimrightcommand";
 import { DIRECTION_KEY_COMMAND_NAME, DirectionKeyCommand, DirectionKeyDirection } from "../commands/directionkeycommand";
 import { CLICK_CIRCLE_COMMAND_NAME, ClickCircleCommand } from "../commands/clickcirclecommand";
-import { MotorSpeedSetEvent } from "../hats/motozero/events/motorspeedsetevent";
-import { MotorTurnedOffEvent } from "../hats/motozero/events/motorturnedoffevent";
+import { MotorSpeedSetEvent, MOTOR_SPEED_SET_EVENT_NAME } from "../hats/motozero/events/motorspeedsetevent";
+import { MotorTurnedOffEvent, MOTOR_TURNED_OFF_EVENT_NAME } from "../hats/motozero/events/motorturnedoffevent";
 import { SET_FULL_STATE_COMMAND_NAME, SetFullStateCommand } from "../commands/setfullstatecommand";
+import { TURNED_OFF_EVENT_NAME } from "../framework/events/turnedoffevent";
+import { LINE_FOUND_SENSATION_NAME, LineFoundSensation } from "../hats/linesensor/sensations/linefoundsensation";
+import { LINE_LOST_SENSATION_NAME, LineLostSensation } from "../hats/linesensor/sensations/linelostsensation";
+import { LineMeasure } from "./valueobjects/linemeasure";
 
 export class TwoWheelDrive implements IAmAnAggregateRoot{
 
@@ -80,10 +84,88 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
 
         return robotEvents;
     }
-    sense(sensation: IAmASensation): IAmARobotEvent[] {
-        throw new Error("Method not implemented.");
+
+    private _lineMeasures: LineMeasure[];
+
+    private founds = 0;
+    private losts = 0;
+
+    sense(sensation: LineLostSensation | LineFoundSensation): IAmARobotEvent[] {
+        var self = this;
+
+        if(!this._lineMeasures){
+            this._lineMeasures = [];
+            for(var i = 0; i < sensation.totalLineSensors; i++){
+                this._lineMeasures.push(new LineMeasure(false));
+            }
+        }
+
+        console.log(sensation);
+        switch(sensation.name){
+            case LINE_FOUND_SENSATION_NAME:
+                this._lineMeasures[sensation.lineSensorId].value = true;
+
+                if(sensation.lineSensorId == 0){
+                    this.adjustLeft(0.5 + this._leftMotorVelocity - this._rightMotorVelocity );
+                }
+                else{
+                    this.adjustRight(Math.pow(1.1, this.founds) * 0.05 / (10 * this._leftMotorVelocity));
+                }
+
+                this.founds++;
+                this.losts = 0;
+
+                break;
+            case LINE_LOST_SENSATION_NAME:
+                this._lineMeasures[sensation.lineSensorId].value = false;
+                
+                if(sensation.lineSensorId == 5){
+                    this.adjustRight(0.5 + this._rightMotorVelocity - this._leftMotorVelocity);
+                }{
+                this.adjustLeft(Math.pow(1.1, this.losts) * 0.05 / (10 * this._rightMotorVelocity));
+                }
+
+                this.losts++;
+                this.founds = 0;
+
+                break;
+        }
+
+        var robotEvents = self.unprocessedEvents;
+        self.unprocessedEvents = [];
+
+        return robotEvents;
     }
     apply(robotEvent: IAmARobotEvent) {
+        switch(robotEvent.name){
+            case MOTOR_SPEED_SET_EVENT_NAME:
+                var speedSet = <MotorSpeedSetEvent>robotEvent;
+                if(speedSet.motorId == this.leftMotorId){
+                    this._leftMotorVelocity = speedSet.speed;
+                }
+                if(speedSet.motorId == this.rightMotorId){
+                    this._rightMotorVelocity = speedSet.speed;
+                }
+                break;
+            case MOTOR_TURNED_OFF_EVENT_NAME:
+                var motorTurnedOff = <MotorTurnedOffEvent>robotEvent;
+                if(motorTurnedOff.motorId == this.leftMotorId){
+                    this._leftMotorVelocity = 0;
+                }
+                if(motorTurnedOff.motorId == this.rightMotorId){
+                    this._rightMotorVelocity = 0;
+                }
+                break;
+            case TURNED_OFF_EVENT_NAME:
+                this._leftMotorVelocity = 0;
+                this._rightMotorVelocity = 0;
+                this._forwardOn = false;
+                this._backwardOn = false;
+                this._leftOn = false;
+                this._rightOn = false;
+                this._speed = 0;
+                break;
+        }
     }
 
     leftMotorId = "leftMotor";
@@ -102,6 +184,8 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
     private _speedDifference: number = 0.5;
     getSpeedDifference(){return this._speedDifference;};
     private _loggers: ((msg:string) => void)[] = [];
+    _leftMotorVelocity: number = 0;
+    _rightMotorVelocity: number = 0;
 
     clearLoggers(){
         this._loggers = [];
@@ -177,6 +261,18 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
             this._trimRight = Math.min(0.9, this._trimRight + this._trimIncrement);
         }
         this._updateMotors();
+    }
+
+    adjustLeft(turnStrength: number){
+        var self = this;
+        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.max(-1, self._leftMotorVelocity - turnStrength)));
+        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.min(1, self._rightMotorVelocity + turnStrength)));
+    }
+
+    adjustRight(turnStrength: number){
+        var self = this;
+        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.max(-1, self._rightMotorVelocity - turnStrength)));
+        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.min(1, self._leftMotorVelocity + turnStrength)));
     }
 
     setSpeed(newSpeed) {

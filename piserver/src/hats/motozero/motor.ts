@@ -28,7 +28,7 @@ export class Motor<T extends IAmAPin>implements IAmAMotor{
 	private _loop() {
 		var self = this;
 
-		if (self._speed > self._currentPulse / self._pulses) {
+		if (Math.abs(self._speed) > self._currentPulse / self._pulses) {
 			self._enablePin.writeSync(1);
 		}
 		else {

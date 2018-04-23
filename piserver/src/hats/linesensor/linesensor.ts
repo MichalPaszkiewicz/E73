@@ -9,11 +9,11 @@ import { LineLostSensation } from "./sensations/linelostsensation";
 
 export class LineSensor<T extends IAmAPin> implements IAmASensor {
 
-    private _pin: IAmAPin;
+    _pin: IAmAPin;
     private _watchDefined: boolean = false;
     private _reversed: boolean = false;
 
-    constructor(public id: string, public pinNumber: number, pinFactory: IAmAPinFactory<T>){
+    constructor(public id: number, public pinNumber: number, pinFactory: IAmAPinFactory<T>){
         this._pin = pinFactory(pinNumber, PinState.IN, PinEdge.BOTH);
     }
 
@@ -28,11 +28,12 @@ export class LineSensor<T extends IAmAPin> implements IAmASensor {
         }
         self._watchDefined = true;
         self._pin.watch((err, val) => {
+            console.log(val);
             if(self._reversed ? val == 0 : val == 1){
-                callback(new LineFoundSensation(self.id));
+                callback(new LineFoundSensation(self.id, 1));
             }
             else{
-                callback(new LineLostSensation(self.id));
+                callback(new LineLostSensation(self.id, 1));
             }
         });
     }
