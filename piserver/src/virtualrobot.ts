@@ -129,7 +129,7 @@ class MyLine{
         }
         ctx.beginPath();
         ctx.strokeStyle = "rgb(255,0,0)";
-        ctx.lineWidth = 80;
+        ctx.lineWidth = 20;
         ctx.moveTo(this.points[0].x, this.points[0].y);        
         for(var i = 1; i < this.points.length; i++){
             ctx.lineTo(this.points[i].x, this.points[i].y);
@@ -162,7 +162,7 @@ class VirtualRobot{
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(self.position.x, self.position.y);
-        var frontPoint = self.position.add(self.direction.multiplyBy(10));
+        var frontPoint = self.position.add(self.direction.multiplyBy(20));
         ctx.lineTo(frontPoint.x, frontPoint.y);
         var rightFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32));
         var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
@@ -187,13 +187,13 @@ class VirtualRobot{
         var leftSpeed = leftMotor.getSpeed() * 5;
         var rightSpeed = rightMotor.getSpeed() * 5;
 
-        var frontPoint = self.position.add(self.direction.multiplyBy(10));
+        var frontPoint = self.position.add(self.direction.multiplyBy(20));
         var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
         var perp = self.direction.getPerpendicularVector().multiplyBy(16);
 
         var pos = leftFront;
         for(var i = 0; i < 5; i++){
-            var colourCheckPos = pos.add(self.direction.multiplyBy(4));
+            var colourCheckPos = pos.add(self.direction.multiplyBy(2));
             var pin = (<FakePin>lineSensorArray._lineSensors[i]._pin);
             var isLine = checkPositionColour(colourCheckPos) ? 1 : 0;
             if(isLine != pin.value()){

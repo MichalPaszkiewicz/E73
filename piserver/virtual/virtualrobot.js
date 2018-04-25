@@ -435,7 +435,13 @@ System.register("framework/services/defaultcontrolmodule", [], function (exports
                     var robotEvents = [];
                     self._sensationHandlers
                         .filter(sh => sh.handles.some(st => st == "*" || st == sensation.name))
-                        .forEach(sh => robotEvents = robotEvents.concat(sh.handle(sensation, self.domainService)));
+                        .forEach(sh => {
+                        var handled = sh.handle(sensation, self.domainService);
+                        if (sh["registerOnExtraEventsAdded"]) {
+                            sh["registerOnExtraEventsAdded"]((e) => self.signal(e));
+                        }
+                        robotEvents = robotEvents.concat(handled);
+                    });
                     robotEvents.forEach(re => self.signal(re));
                 }
                 registerRobotEventHandler(robotEventHandler) {
@@ -841,32 +847,56 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     }
                     console.log(sensation);
                     switch (sensation.name) {
+                        // case LINE_FOUND_SENSATION_NAME:
+                        //     this._lineMeasures[sensation.lineSensorId].value = true;
+                        //     if(sensation.lineSensorId == 0){
+                        //         this.adjustLeft(0.5 + this._leftMotorVelocity - this._rightMotorVelocity );
+                        //     }
+                        //     else{
+                        //         this.adjustRight(Math.pow(1.1, this.founds) * 0.05 / (10 * this._leftMotorVelocity));
+                        //     }
+                        //     this.founds++;
+                        //     this.losts = 0;
+                        //     break;
+                        // case LINE_LOST_SENSATION_NAME:
+                        //     this._lineMeasures[sensation.lineSensorId].value = false;
+                        //     if(sensation.lineSensorId == 5){
+                        //         this.adjustRight(0.5 + this._rightMotorVelocity - this._leftMotorVelocity);
+                        //     }{
+                        //     this.adjustLeft(Math.pow(1.1, this.losts) * 0.05 / (10 * this._rightMotorVelocity));
+                        //     }
+                        //     this.losts++;
+                        //     this.founds = 0;
+                        //     break;
                         case linefoundsensation_2.LINE_FOUND_SENSATION_NAME:
                             this._lineMeasures[sensation.lineSensorId].value = true;
-                            if (sensation.lineSensorId == 0) {
-                                this.adjustLeft(0.5 + this._leftMotorVelocity - this._rightMotorVelocity);
-                            }
-                            else {
-                                this.adjustRight(Math.pow(1.1, this.founds) * 0.05 / (10 * this._leftMotorVelocity));
-                            }
-                            this.founds++;
-                            this.losts = 0;
+                            this.adjust(this.getLinePosition());
                             break;
                         case linelostsensation_2.LINE_LOST_SENSATION_NAME:
                             this._lineMeasures[sensation.lineSensorId].value = false;
-                            if (sensation.lineSensorId == 5) {
-                                this.adjustRight(0.5 + this._rightMotorVelocity - this._leftMotorVelocity);
-                            }
-                            {
-                                this.adjustLeft(Math.pow(1.1, this.losts) * 0.05 / (10 * this._rightMotorVelocity));
-                            }
-                            this.losts++;
-                            this.founds = 0;
+                            this.adjust(this.getLinePosition());
                             break;
                     }
                     var robotEvents = self.unprocessedEvents;
                     self.unprocessedEvents = [];
                     return robotEvents;
+                }
+                getLinePosition() {
+                    var ons = [];
+                    for (var i = 0; i < this._lineMeasures.length; i++) {
+                        if (this._lineMeasures[i].value == true) {
+                            ons.push(i);
+                        }
+                    }
+                    var sum = 0;
+                    if (ons.length == 0) {
+                        return 0;
+                    }
+                    ons.forEach(o => sum += o);
+                    var average = sum / this._lineMeasures.length;
+                    // -1 for left to +1 for right
+                    var normalised = 2 * average / (ons.length) - 1;
+                    return normalised;
                 }
                 apply(robotEvent) {
                     switch (robotEvent.name) {
@@ -968,15 +998,38 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     }
                     this._updateMotors();
                 }
-                adjustLeft(turnStrength) {
+                adjustTurnLeft(turnStrength) {
                     var self = this;
-                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, Math.max(-1, self._leftMotorVelocity - turnStrength)));
-                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, Math.min(1, self._rightMotorVelocity + turnStrength)));
+                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, -turnStrength));
+                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, turnStrength));
+                    //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.max(-1, self._leftMotorVelocity - turnStrength)));
+                    //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.min(1, self._rightMotorVelocity + turnStrength)));
                 }
-                adjustRight(turnStrength) {
+                adjustTurnRight(turnStrength) {
                     var self = this;
-                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, Math.max(-1, self._rightMotorVelocity - turnStrength)));
-                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, Math.min(1, self._leftMotorVelocity + turnStrength)));
+                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, turnStrength));
+                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, -turnStrength));
+                    //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.max(-1, self._rightMotorVelocity - turnStrength)));
+                    //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.min(1, self._leftMotorVelocity + turnStrength)));
+                }
+                registerOnExtraEventsAdded(func) {
+                    this._onExtraEventsAdded = func;
+                }
+                adjust(amount) {
+                    console.log("adjust", amount);
+                    var self = this;
+                    if (amount < 0) {
+                        self.adjustTurnLeft(0.3 * Math.abs(amount));
+                    }
+                    if (amount > 0) {
+                        self.adjustTurnRight(0.3 * Math.abs(amount));
+                    }
+                    setTimeout(() => {
+                        if (self._onExtraEventsAdded) {
+                            self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, 0.1));
+                            self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, 0.1));
+                        }
+                    }, 100 * Math.abs(amount));
                 }
                 setSpeed(newSpeed) {
                     this._speed = newSpeed;
@@ -1052,9 +1105,16 @@ System.register("sensationhandlers/linesensationhandler", ["hats/linesensor/sens
                         linelostsensation_3.LINE_LOST_SENSATION_NAME
                     ];
                 }
+                registerOnExtraEventsAdded(func) {
+                    this._onExtraEventsAdded = func;
+                }
                 handle(sensation, domainService) {
+                    var self = this;
                     var robotEvents = [];
                     domainService.getAggregateRoot(twowheeldrive_1.TwoWheelDrive, (a) => {
+                        if (a["registerOnExtraEventsAdded"] && this._onExtraEventsAdded) {
+                            a.registerOnExtraEventsAdded((e) => self._onExtraEventsAdded(e));
+                        }
                         robotEvents = a.sense(sensation);
                     });
                     return robotEvents;
@@ -1245,6 +1305,7 @@ System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/direct
                     ];
                 }
                 handle(command, domainService) {
+                    var self = this;
                     var robotEvents = [];
                     domainService.getAggregateRoot(twowheeldrive_2.TwoWheelDrive, (ar) => {
                         robotEvents = ar.handle(command);
@@ -1789,7 +1850,7 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
                     }
                     ctx.beginPath();
                     ctx.strokeStyle = "rgb(255,0,0)";
-                    ctx.lineWidth = 80;
+                    ctx.lineWidth = 20;
                     ctx.moveTo(this.points[0].x, this.points[0].y);
                     for (var i = 1; i < this.points.length; i++) {
                         ctx.lineTo(this.points[i].x, this.points[i].y);
@@ -1819,7 +1880,7 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
                     ctx.stroke();
                     ctx.beginPath();
                     ctx.moveTo(self.position.x, self.position.y);
-                    var frontPoint = self.position.add(self.direction.multiplyBy(10));
+                    var frontPoint = self.position.add(self.direction.multiplyBy(20));
                     ctx.lineTo(frontPoint.x, frontPoint.y);
                     var rightFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32));
                     var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
@@ -1842,12 +1903,12 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
                     var self = this;
                     var leftSpeed = leftMotor.getSpeed() * 5;
                     var rightSpeed = rightMotor.getSpeed() * 5;
-                    var frontPoint = self.position.add(self.direction.multiplyBy(10));
+                    var frontPoint = self.position.add(self.direction.multiplyBy(20));
                     var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
                     var perp = self.direction.getPerpendicularVector().multiplyBy(16);
                     var pos = leftFront;
                     for (var i = 0; i < 5; i++) {
-                        var colourCheckPos = pos.add(self.direction.multiplyBy(4));
+                        var colourCheckPos = pos.add(self.direction.multiplyBy(2));
                         var pin = lineSensorArray._lineSensors[i]._pin;
                         var isLine = checkPositionColour(colourCheckPos) ? 1 : 0;
                         if (isLine != pin.value()) {

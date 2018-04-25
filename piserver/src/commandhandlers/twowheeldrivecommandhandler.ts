@@ -15,10 +15,14 @@ export class TwoWheelDriveCommandHandler implements IAmACommandHandler {
         TRIM_LEFT_COMMAND_NAME,
         TRIM_RIGHT_COMMAND_NAME
     ]
+
+
+
     handle(command: SetFullStateCommand |
             DirectionKeyCommand |
             TrimLeftCommand |
             TrimRightCommand, domainService: IAmADomainService): IAmARobotEvent[] {
+        var self = this;
         var robotEvents = [];
         domainService.getAggregateRoot(TwoWheelDrive, (ar) => {
             robotEvents = ar.handle(command);        

@@ -102,31 +102,42 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
 
         console.log(sensation);
         switch(sensation.name){
+            // case LINE_FOUND_SENSATION_NAME:
+            //     this._lineMeasures[sensation.lineSensorId].value = true;
+
+            //     if(sensation.lineSensorId == 0){
+            //         this.adjustLeft(0.5 + this._leftMotorVelocity - this._rightMotorVelocity );
+            //     }
+            //     else{
+            //         this.adjustRight(Math.pow(1.1, this.founds) * 0.05 / (10 * this._leftMotorVelocity));
+            //     }
+
+            //     this.founds++;
+            //     this.losts = 0;
+
+            //     break;
+            // case LINE_LOST_SENSATION_NAME:
+            //     this._lineMeasures[sensation.lineSensorId].value = false;
+                
+            //     if(sensation.lineSensorId == 5){
+            //         this.adjustRight(0.5 + this._rightMotorVelocity - this._leftMotorVelocity);
+            //     }{
+            //     this.adjustLeft(Math.pow(1.1, this.losts) * 0.05 / (10 * this._rightMotorVelocity));
+            //     }
+
+            //     this.losts++;
+            //     this.founds = 0;
+
+            //     break;
+
             case LINE_FOUND_SENSATION_NAME:
                 this._lineMeasures[sensation.lineSensorId].value = true;
-
-                if(sensation.lineSensorId == 0){
-                    this.adjustLeft(0.5 + this._leftMotorVelocity - this._rightMotorVelocity );
-                }
-                else{
-                    this.adjustRight(Math.pow(1.1, this.founds) * 0.05 / (10 * this._leftMotorVelocity));
-                }
-
-                this.founds++;
-                this.losts = 0;
-
+                this.adjust(this.getLinePosition());
+                
                 break;
             case LINE_LOST_SENSATION_NAME:
                 this._lineMeasures[sensation.lineSensorId].value = false;
-                
-                if(sensation.lineSensorId == 5){
-                    this.adjustRight(0.5 + this._rightMotorVelocity - this._leftMotorVelocity);
-                }{
-                this.adjustLeft(Math.pow(1.1, this.losts) * 0.05 / (10 * this._rightMotorVelocity));
-                }
-
-                this.losts++;
-                this.founds = 0;
+                this.adjust(this.getLinePosition());
 
                 break;
         }
@@ -136,6 +147,27 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
 
         return robotEvents;
     }
+
+    getLinePosition(){
+        var ons = [];
+        for(var i = 0; i < this._lineMeasures.length; i++){
+            if(this._lineMeasures[i].value== true){
+                ons.push(i);
+            }
+        }
+        var sum = 0;
+        if(ons.length == 0){
+            return 0;
+        }
+        ons.forEach(o => sum+=o);
+        var average = sum / this._lineMeasures.length;
+
+        // -1 for left to +1 for right
+        var normalised = 2 * average / (ons.length) - 1;
+
+        return normalised;
+    }
+
     apply(robotEvent: IAmARobotEvent) {
         switch(robotEvent.name){
             case MOTOR_SPEED_SET_EVENT_NAME:
@@ -263,16 +295,51 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         this._updateMotors();
     }
 
-    adjustLeft(turnStrength: number){
+    adjustTurnLeft(turnStrength: number){
         var self = this;
-        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.max(-1, self._leftMotorVelocity - turnStrength)));
-        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.min(1, self._rightMotorVelocity + turnStrength)));
+
+        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, -turnStrength));
+        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, turnStrength));
+
+        //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.max(-1, self._leftMotorVelocity - turnStrength)));
+        //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.min(1, self._rightMotorVelocity + turnStrength)));
     }
 
-    adjustRight(turnStrength: number){
+    adjustTurnRight(turnStrength: number){
         var self = this;
-        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.max(-1, self._rightMotorVelocity - turnStrength)));
-        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.min(1, self._leftMotorVelocity + turnStrength)));
+
+        
+        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, turnStrength));
+        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, -turnStrength));
+
+        //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.max(-1, self._rightMotorVelocity - turnStrength)));
+        //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.min(1, self._leftMotorVelocity + turnStrength)));
+    }
+
+
+    private _onExtraEventsAdded: (e: IAmARobotEvent) => void;
+
+    registerOnExtraEventsAdded(func: (e: IAmARobotEvent) => void){
+        this._onExtraEventsAdded = func;
+    }
+
+    adjust(amount: number){
+        console.log("adjust", amount);
+        var self = this;
+        if(amount < 0){
+            self.adjustTurnLeft(0.3 * Math.abs(amount));
+        }
+
+        if(amount > 0){
+            self.adjustTurnRight(0.3 * Math.abs(amount));
+        }
+
+        setTimeout(() => {
+            if(self._onExtraEventsAdded){
+                self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, 0.1));
+                self._onExtraEventsAdded(new MotorSpeedSetEvent(self.rightMotorId, 0.1));
+            }
+        }, 100 * Math.abs(amount));
     }
 
     setSpeed(newSpeed) {

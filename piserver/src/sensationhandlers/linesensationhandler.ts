@@ -11,9 +11,19 @@ export class LineSensationHandler implements IAmASensationHandler{
         LINE_LOST_SENSATION_NAME
     ]
 
+    private _onExtraEventsAdded: (e: IAmARobotEvent) => void;
+
+    registerOnExtraEventsAdded(func: (e: IAmARobotEvent) => void){
+        this._onExtraEventsAdded = func;
+    }
+
     handle(sensation: LineFoundSensation | LineLostSensation, domainService: IAmADomainService): IAmARobotEvent[]{
+        var self = this;
         var robotEvents = [];
         domainService.getAggregateRoot(TwoWheelDrive, (a) => {
+            if(a["registerOnExtraEventsAdded"] && this._onExtraEventsAdded){
+                a.registerOnExtraEventsAdded((e) => self._onExtraEventsAdded(e));            
+            }
             robotEvents = a.sense(sensation);
         });
         return robotEvents;

@@ -43,7 +43,13 @@ export class DefaultControlModule implements IAmAControlModule {
         var robotEvents = [];
         self._sensationHandlers
             .filter(sh => sh.handles.some(st => st == "*" || st == sensation.name))
-            .forEach(sh => robotEvents = robotEvents.concat(sh.handle(sensation, self.domainService)));
+            .forEach(sh =>{
+                var handled = sh.handle(sensation, self.domainService);
+                if(sh["registerOnExtraEventsAdded"]){
+                    sh["registerOnExtraEventsAdded"]((e) => self.signal(e));            
+                }
+                robotEvents = robotEvents.concat(handled)
+            });
         robotEvents.forEach(re => self.signal(re));
     }
 
