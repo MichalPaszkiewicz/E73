@@ -56,6 +56,13 @@ run `tsc -p buildsimulation`
 
 run `node sim/simulation.js`
 
+## Virtual line tracker
+
+You can test out the virtual line tracker by putting this code on a machine with a decent browser.
+
+run `tsc -p buildvirtualrobot`
+
+And then open up "virtual.html". You can draw lines by clicking on the box. The robot will start moving when it first detects a line.
 
 ## todo
 
@@ -63,4 +70,6 @@ Check that direction of bottom area of circle is as required
 
 Permanent storage of learnt sequences?
 
-Drag response to circle interaction
+## Further information
+
+Please see ./src/zCODING_GUIDE.md and ./src/hats/*/README.md for further information.
