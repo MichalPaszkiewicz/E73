@@ -6,16 +6,13 @@ import { DefaultDomainService } from "./framework/services/defaultdomainservice"
 import { LearningService } from "./services/learningservice";
 import { LocalStorageService } from "./services/localstorageservice";
 import { FrontEndCommandHandler } from "./commandhandlers/frontendcommandhandler";
+import { Keyboard } from "./userinterfaces/keyboard";
 
-var motor1 = fakeMotorFactory("motor1", 5, 24, 27);
-var motor2 = fakeMotorFactory("motor2", 17, 6, 22);
-var motor3 = fakeMotorFactory("motor3", 12, 23, 16);
-var motor4 = fakeMotorFactory("motor4", 25, 13, 18);
+var controlModule = new DefaultControlModule(new DefaultDomainService());
 
-var domainService = new DefaultDomainService();
-var controlModule = new DefaultControlModule(domainService);
-
-var robot = new Robot(controlModule, [], []);
+var robot = new Robot(controlModule, [
+	new Keyboard()
+], []);
 
 var serverUrl = window.location.origin;
 

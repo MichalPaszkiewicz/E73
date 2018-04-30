@@ -80,11 +80,11 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         switch(sensation.name){
             case LINE_FOUND_SENSATION_NAME:
                 this._lineMeasures.setValue(sensation.lineSensorId, true); 
-                this.adjust(this._lineMeasures.getLinePosition());
+                this.adjust(this._lineMeasures.getLineCentre());
                 break;
             case LINE_LOST_SENSATION_NAME:
                 this._lineMeasures.setValue(sensation.lineSensorId, false);
-                this.adjust(this._lineMeasures.getLinePosition());
+                this.adjust(this._lineMeasures.getLineCentre());
                 break;
         }
 
@@ -266,9 +266,12 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         }
 
         if(vector.y < 0){
-            self._reverseMode = true;               
+            self._reverseMode = true;
+            
+            var lineCentre = self._lineMeasures.getLineCentre();
 
             var preferenceTested = Math.abs(vector.x) < 0.2 ? 
+                Math.abs(lineCentre.x) > 0.05 ? lineCentre.x > 0 ? 0.2 : -0.2 :
                 self._leftPreference ? -1 : 1 : vector.x;
 
             self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, -0.1));
@@ -310,7 +313,7 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
                 self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, 0.15));
                 self._onExtraEventsAdded(new MotorSpeedSetEvent(self.rightMotorId, 0.15));
             }
-        }, 100 * Math.abs(vector.x));
+        }, 200 * Math.abs(vector.x));
     }
 
     setSpeed(newSpeed) {

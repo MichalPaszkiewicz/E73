@@ -1,4 +1,5 @@
 import { LineMeasure } from "../valueobjects/linemeasure";
+import { Maths } from "../../helpers/maths";
 
 export class LineMeasureArray{
     private _lineMeasures: LineMeasure[] = [];
@@ -21,24 +22,41 @@ export class LineMeasureArray{
         return newLineMeasureArray;
     }
 
-    getLinePosition(){
+    getLineCentre(){
         var ons = [];
+
         for(var i = 0; i < this._lineMeasures.length; i++){
             if(this._lineMeasures[i].value == true){
-                ons.push(i);
+                ons.push(2 * (i - (this._lineMeasures.length - 1) / 2) / (this._lineMeasures.length - 1));
             }
         }
-        var sum = 0;
-        if(ons.length == 0){
-            return 0;
+
+        var average = Maths.Average(ons);
+        return isNaN(average) ? 0 : average;
+    }
+
+    getLinePosition(){
+        var markerPoints = [];
+
+        for(var i = 0; i < this._lineMeasures.length - 1; i++){
+            if(this._lineMeasures[i].value == true && this._lineMeasures[i+1].value == false
+            || this._lineMeasures[i].value == false && this._lineMeasures[i+1].value == true){
+                markerPoints.push(true);
+            }
+            else{
+                markerPoints.push(false);
+            }
         }
-        ons.forEach(o => sum+=o);
-        var average = sum / this._lineMeasures.length;
 
-        // -1 for left to +1 for right
-        var normalised = 2 * average / (ons.length) - 1;
+        var toNums = [];
+        for(var i = 0; i < markerPoints.length; i++){
+            if(markerPoints[i] == true){
+                toNums.push(2 * (i - (markerPoints.length - 1) / 2) / (markerPoints.length -1));
+            }
+        }
 
-        return normalised;
+        var average = Maths.Average(toNums);
+        return isNaN(average) ? 0 : average;
     }
 
     getValues(): boolean[]{

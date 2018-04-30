@@ -38,13 +38,22 @@ test("line measure gives correct 2 groupings for 2 lines with break", () => {
     expect(groupings[1][1]).toBe(3);
 });
 
+test("line measure gives correct position for 10000", () => {
+
+    var lineMeasureArray = new LineMeasureArray(5);
+    lineMeasureArray.setValue(0, true);
+
+    expect(lineMeasureArray.getLinePosition()).toBe(-1);
+
+});
+
 test("line measure gives correct position for 11000", () => {
 
     var lineMeasureArray = new LineMeasureArray(5);
     lineMeasureArray.setValue(0, true);
     lineMeasureArray.setValue(1, true);
 
-    expect(lineMeasureArray.getLinePosition()).toBe(-0.5);
+    expect(lineMeasureArray.getLinePosition()).toBe(-1/3);
 
 });
 
@@ -55,7 +64,7 @@ test("line measure gives correct position for 11100", () => {
     lineMeasureArray.setValue(1, true);
     lineMeasureArray.setValue(2, true);
 
-    expect(lineMeasureArray.getLinePosition()).toBe(0.25);
+    expect(lineMeasureArray.getLinePosition()).toBe(1/3);
 
 });
 
@@ -65,5 +74,5 @@ test("line measure gives correct position for 00111", () => {
     lineMeasureArray.setValue(3, true);
     lineMeasureArray.setValue(4, true);
 
-    expect(lineMeasureArray.getLinePosition()).toBe(-0.25);
+    expect(lineMeasureArray.getLinePosition()).toBe(-1/3);
 });

@@ -12,35 +12,6 @@ import { StartLearningCommand } from "./commands/startlearningcommand";
 import { EndLearningCommand } from "./commands/endlearningcommand";
 import { RunLearntSequenceCommand } from "./commands/runlearntsequencecommand";
 
-var keys = {};
-
-var setKeyState = (keyName, state) => {
-    if (keys[keyName] === state) {
-        return;
-    }
-	keys[keyName] = state;
-    ctrlModule.handle(new DirectionKeyCommand(keyName, state)); 
-}
-
-var tryKeySwitch = (keyCode, value) => {
-	switch (keyCode) {
-		case "ArrowLeft":
-            setKeyState("left", value);
-            break;
-        case "ArrowRight":
-            setKeyState("right", value);
-            break;
-        case "ArrowUp":
-            setKeyState("up", value);
-            break;
-        case "ArrowDown":
-            setKeyState("down", value);
-    }
-}
-
-document.onkeydown = e => tryKeySwitch(e.code, true);
-document.onkeyup = e => tryKeySwitch(e.code, false);
-
 document.getElementById("trimleft").onclick = e => ctrlModule.handle(new TrimLeftCommand());	
 document.getElementById("trimright").onclick = e => ctrlModule.handle(new TrimRightCommand());
 

@@ -96,19 +96,25 @@ test("trim right trims the right motor", () => {
     expect(testTwoWheelDrive.getRightTrim()).toBe(0.05);
 });
 
-test("line found on single line tracker shifts drive left", () => {
+test("line found on triple line tracker shifts drive left", () => {
     var twoWheelDrive = new TwoWheelDrive();
 
-    var events = twoWheelDrive.sense(new LineFoundSensation(0, 1));
+    var events = [
+        ...twoWheelDrive.sense(new LineFoundSensation(0, 3)),
+    ];        
     events.forEach(e => twoWheelDrive.apply(e));
 
     expect(twoWheelDrive._leftMotorVelocity).toBeLessThan(twoWheelDrive._rightMotorVelocity);
 });
 
-test("line lost on single line tracker shifts drive right", () => {
+test("line lost on triple line tracker shifts drive right", () => {
     var twoWheelDrive = new TwoWheelDrive();
 
-    var events = twoWheelDrive.sense(new LineLostSensation(0, 1));
+    var events = [
+        ...twoWheelDrive.sense(new LineFoundSensation(2, 3)),
+        ...twoWheelDrive.sense(new LineFoundSensation(1, 3)),
+        ...twoWheelDrive.sense(new LineLostSensation(1,3))
+    ];     
     events.forEach(e => twoWheelDrive.apply(e));
 
     expect(twoWheelDrive._rightMotorVelocity).toBeLessThan(twoWheelDrive._leftMotorVelocity);

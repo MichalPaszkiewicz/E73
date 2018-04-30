@@ -25,23 +25,36 @@ export class LineMeasureArrayMemory{
         return this._lineMeasureArrays[this.memoryDepth - 1];
     }
 
-    getLinePosition(): Vector2d{
-        var self = this;
-        var currentVals = self.getLatestArray().getValues();
-        var isOnLine = currentVals.some(v => v == true);
+    isOnLine(){
+        var currentVals = this.getLatestArray().getValues();
+        return currentVals.some(v => v == true);        
+    }
+
+    getLineMemoryAge(){
         var lineMemoryAge = 0;
 
         var j = 0;
-        for(var i = self._lineMeasureArrays.length - 2; i > -1; i--){
+        for(var i = this._lineMeasureArrays.length - 2; i > -1; i--){
             j--;
-            if(self._lineMeasureArrays[i].getValues().some(v => v == true)){
+            if(this._lineMeasureArrays[i].getValues().some(v => v == true)){
                 lineMemoryAge = j;
             }
         }
+        return lineMemoryAge;
+    }
 
+    getLinePosition(): Vector2d{
+        var self = this;
         return new Vector2d(
             Maths.MovingAverage(self._lineMeasureArrays.map(lm => lm.getLinePosition())),
-            isOnLine ? 0 : lineMemoryAge);
+            self.isOnLine() ? 0 : self.getLineMemoryAge());
+    }
+
+    getLineCentre(): Vector2d{
+        return new Vector2d(
+            Maths.MovingAverage(this._lineMeasureArrays.map(lm => lm.getLineCentre())),
+            this.isOnLine() ? 0 : this.getLineMemoryAge()
+        );
     }
 
     getValues(){

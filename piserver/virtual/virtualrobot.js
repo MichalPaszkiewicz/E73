@@ -739,14 +739,40 @@ System.register("aggregateroots/directionkeytofunc", [], function (exports_38, c
         }
     };
 });
-System.register("aggregateroots/entities/linemeasurearray", ["aggregateroots/valueobjects/linemeasure"], function (exports_39, context_39) {
+System.register("helpers/maths", [], function (exports_39, context_39) {
     "use strict";
     var __moduleName = context_39 && context_39.id;
-    var linemeasure_1, LineMeasureArray;
+    var Maths;
+    return {
+        setters: [],
+        execute: function () {
+            Maths = class Maths {
+                static Average(numbers) {
+                    var total = 0;
+                    numbers.forEach(n => total += n);
+                    return total / numbers.length;
+                }
+                static MovingAverage(numbers) {
+                    var total = 0;
+                    numbers.forEach(n => total += n);
+                    return total / numbers.length;
+                }
+            };
+            exports_39("Maths", Maths);
+        }
+    };
+});
+System.register("aggregateroots/entities/linemeasurearray", ["aggregateroots/valueobjects/linemeasure", "helpers/maths"], function (exports_40, context_40) {
+    "use strict";
+    var __moduleName = context_40 && context_40.id;
+    var linemeasure_1, maths_1, LineMeasureArray;
     return {
         setters: [
             function (linemeasure_1_1) {
                 linemeasure_1 = linemeasure_1_1;
+            },
+            function (maths_1_1) {
+                maths_1 = maths_1_1;
             }
         ],
         execute: function () {
@@ -768,22 +794,35 @@ System.register("aggregateroots/entities/linemeasurearray", ["aggregateroots/val
                     }
                     return newLineMeasureArray;
                 }
-                getLinePosition() {
+                getLineCentre() {
                     var ons = [];
                     for (var i = 0; i < this._lineMeasures.length; i++) {
                         if (this._lineMeasures[i].value == true) {
-                            ons.push(i);
+                            ons.push(2 * (i - (this._lineMeasures.length - 1) / 2) / (this._lineMeasures.length - 1));
                         }
                     }
-                    var sum = 0;
-                    if (ons.length == 0) {
-                        return 0;
+                    var average = maths_1.Maths.Average(ons);
+                    return isNaN(average) ? 0 : average;
+                }
+                getLinePosition() {
+                    var markerPoints = [];
+                    for (var i = 0; i < this._lineMeasures.length - 1; i++) {
+                        if (this._lineMeasures[i].value == true && this._lineMeasures[i + 1].value == false
+                            || this._lineMeasures[i].value == false && this._lineMeasures[i + 1].value == true) {
+                            markerPoints.push(true);
+                        }
+                        else {
+                            markerPoints.push(false);
+                        }
                     }
-                    ons.forEach(o => sum += o);
-                    var average = sum / this._lineMeasures.length;
-                    // -1 for left to +1 for right
-                    var normalised = 2 * average / (ons.length) - 1;
-                    return normalised;
+                    var toNums = [];
+                    for (var i = 0; i < markerPoints.length; i++) {
+                        if (markerPoints[i] == true) {
+                            toNums.push(2 * (i - (markerPoints.length - 1) / 2) / (markerPoints.length - 1));
+                        }
+                    }
+                    var average = maths_1.Maths.Average(toNums);
+                    return isNaN(average) ? 0 : average;
                 }
                 getValues() {
                     return this._lineMeasures.map(lm => lm.value);
@@ -807,13 +846,13 @@ System.register("aggregateroots/entities/linemeasurearray", ["aggregateroots/val
                     return groups;
                 }
             };
-            exports_39("LineMeasureArray", LineMeasureArray);
+            exports_40("LineMeasureArray", LineMeasureArray);
         }
     };
 });
-System.register("helpers/vector", [], function (exports_40, context_40) {
+System.register("helpers/vector", [], function (exports_41, context_41) {
     "use strict";
-    var __moduleName = context_40 && context_40.id;
+    var __moduleName = context_41 && context_41.id;
     var Vector2d;
     return {
         setters: [],
@@ -853,37 +892,14 @@ System.register("helpers/vector", [], function (exports_40, context_40) {
                     return new Vector2d(-this.x, -this.y);
                 }
             };
-            exports_40("Vector2d", Vector2d);
-        }
-    };
-});
-System.register("helpers/maths", [], function (exports_41, context_41) {
-    "use strict";
-    var __moduleName = context_41 && context_41.id;
-    var Maths;
-    return {
-        setters: [],
-        execute: function () {
-            Maths = class Maths {
-                static Average(numbers) {
-                    var total = 0;
-                    numbers.forEach(n => total += n);
-                    return total / numbers.length;
-                }
-                static MovingAverage(numbers) {
-                    var total = 0;
-                    numbers.forEach(n => total += n);
-                    return total / numbers.length;
-                }
-            };
-            exports_41("Maths", Maths);
+            exports_41("Vector2d", Vector2d);
         }
     };
 });
 System.register("aggregateroots/entities/linemeasurearraymemory", ["aggregateroots/entities/linemeasurearray", "helpers/vector", "helpers/maths"], function (exports_42, context_42) {
     "use strict";
     var __moduleName = context_42 && context_42.id;
-    var linemeasurearray_1, vector_1, maths_1, LineMeasureArrayMemory;
+    var linemeasurearray_1, vector_1, maths_2, LineMeasureArrayMemory;
     return {
         setters: [
             function (linemeasurearray_1_1) {
@@ -892,8 +908,8 @@ System.register("aggregateroots/entities/linemeasurearraymemory", ["aggregateroo
             function (vector_1_1) {
                 vector_1 = vector_1_1;
             },
-            function (maths_1_1) {
-                maths_1 = maths_1_1;
+            function (maths_2_1) {
+                maths_2 = maths_2_1;
             }
         ],
         execute: function () {
@@ -916,19 +932,27 @@ System.register("aggregateroots/entities/linemeasurearraymemory", ["aggregateroo
                 getLatestArray() {
                     return this._lineMeasureArrays[this.memoryDepth - 1];
                 }
-                getLinePosition() {
-                    var self = this;
-                    var currentVals = self.getLatestArray().getValues();
-                    var isOnLine = currentVals.some(v => v == true);
+                isOnLine() {
+                    var currentVals = this.getLatestArray().getValues();
+                    return currentVals.some(v => v == true);
+                }
+                getLineMemoryAge() {
                     var lineMemoryAge = 0;
                     var j = 0;
-                    for (var i = self._lineMeasureArrays.length - 2; i > -1; i--) {
+                    for (var i = this._lineMeasureArrays.length - 2; i > -1; i--) {
                         j--;
-                        if (self._lineMeasureArrays[i].getValues().some(v => v == true)) {
+                        if (this._lineMeasureArrays[i].getValues().some(v => v == true)) {
                             lineMemoryAge = j;
                         }
                     }
-                    return new vector_1.Vector2d(maths_1.Maths.MovingAverage(self._lineMeasureArrays.map(lm => lm.getLinePosition())), isOnLine ? 0 : lineMemoryAge);
+                    return lineMemoryAge;
+                }
+                getLinePosition() {
+                    var self = this;
+                    return new vector_1.Vector2d(maths_2.Maths.MovingAverage(self._lineMeasureArrays.map(lm => lm.getLinePosition())), self.isOnLine() ? 0 : self.getLineMemoryAge());
+                }
+                getLineCentre() {
+                    return new vector_1.Vector2d(maths_2.Maths.MovingAverage(this._lineMeasureArrays.map(lm => lm.getLineCentre())), this.isOnLine() ? 0 : this.getLineMemoryAge());
                 }
                 getValues() {
                     return this.getLatestArray().getValues();
@@ -1081,11 +1105,11 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     switch (sensation.name) {
                         case linefoundsensation_2.LINE_FOUND_SENSATION_NAME:
                             this._lineMeasures.setValue(sensation.lineSensorId, true);
-                            this.adjust(this._lineMeasures.getLinePosition());
+                            this.adjust(this._lineMeasures.getLineCentre());
                             break;
                         case linelostsensation_2.LINE_LOST_SENSATION_NAME:
                             this._lineMeasures.setValue(sensation.lineSensorId, false);
-                            this.adjust(this._lineMeasures.getLinePosition());
+                            this.adjust(this._lineMeasures.getLineCentre());
                             break;
                     }
                     var robotEvents = self.unprocessedEvents;
@@ -1219,8 +1243,10 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     }
                     if (vector.y < 0) {
                         self._reverseMode = true;
+                        var lineCentre = self._lineMeasures.getLineCentre();
                         var preferenceTested = Math.abs(vector.x) < 0.2 ?
-                            self._leftPreference ? -1 : 1 : vector.x;
+                            Math.abs(lineCentre.x) > 0.05 ? lineCentre.x > 0 ? 0.2 : -0.2 :
+                                self._leftPreference ? -1 : 1 : vector.x;
                         self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, -0.1));
                         self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, -0.1));
                         console.log("reverse!");
@@ -1252,7 +1278,7 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                             self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, 0.15));
                             self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, 0.15));
                         }
-                    }, 100 * Math.abs(vector.x));
+                    }, 200 * Math.abs(vector.x));
                 }
                 setSpeed(newSpeed) {
                     this._speed = newSpeed;
@@ -2027,7 +2053,7 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
                     }
                     ctx.beginPath();
                     ctx.strokeStyle = "rgb(255,0,0)";
-                    ctx.lineWidth = 20;
+                    ctx.lineWidth = 30;
                     ctx.moveTo(this.points[0].x, this.points[0].y);
                     for (var i = 1; i < this.points.length; i++) {
                         ctx.lineTo(this.points[i].x, this.points[i].y);
@@ -2057,7 +2083,7 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
                     ctx.stroke();
                     ctx.beginPath();
                     ctx.moveTo(self.position.x, self.position.y);
-                    var frontPoint = self.position.add(self.direction.multiplyBy(20));
+                    var frontPoint = self.position.add(self.direction.multiplyBy(30));
                     ctx.lineTo(frontPoint.x, frontPoint.y);
                     var rightFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32));
                     var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
@@ -2080,7 +2106,7 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
                     var self = this;
                     var leftSpeed = leftMotor.getSpeed() * 5;
                     var rightSpeed = rightMotor.getSpeed() * 5;
-                    var frontPoint = self.position.add(self.direction.multiplyBy(20));
+                    var frontPoint = self.position.add(self.direction.multiplyBy(30));
                     var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
                     var perp = self.direction.getPerpendicularVector().multiplyBy(16);
                     var pos = leftFront;
