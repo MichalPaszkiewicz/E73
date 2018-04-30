@@ -28,7 +28,6 @@ export class LineSensor<T extends IAmAPin> implements IAmASensor {
         }
         self._watchDefined = true;
         self._pin.watch((err, val) => {
-            console.log(val);
             if(self._reversed ? val == 0 : val == 1){
                 callback(new LineFoundSensation(self.id, 1));
             }

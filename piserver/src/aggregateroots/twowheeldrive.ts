@@ -15,6 +15,10 @@ import { TURNED_OFF_EVENT_NAME } from "../framework/events/turnedoffevent";
 import { LINE_FOUND_SENSATION_NAME, LineFoundSensation } from "../hats/linesensor/sensations/linefoundsensation";
 import { LINE_LOST_SENSATION_NAME, LineLostSensation } from "../hats/linesensor/sensations/linelostsensation";
 import { LineMeasure } from "./valueobjects/linemeasure";
+import { DirectionKeyToFunc } from "./directionkeytofunc";
+import { LineMeasureArray } from "./entities/linemeasurearray";
+import { LineMeasureArrayMemory } from "./entities/linemeasurearraymemory";
+import { Vector2d } from "../helpers/vector";
 
 export class TwoWheelDrive implements IAmAnAggregateRoot{
 
@@ -30,40 +34,18 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
                 break;
             case DIRECTION_KEY_COMMAND_NAME:
                 var directionKey = <DirectionKeyCommand>command;
-                switch(directionKey.direction){
-                    case DirectionKeyDirection.UP:
-                        if(directionKey.isKeyDown){
-                            self.forward();
-                        }
-                        else{
-                            self.forwardOff();
-                        }
-                        break;
-                    case DirectionKeyDirection.DOWN:
-                        if(directionKey.isKeyDown){
-                            self.backward();
-                        }
-                        else{
-                            self.backwardOff();
-                        }
-                        break;
-                    case DirectionKeyDirection.LEFT:
-                        if(directionKey.isKeyDown){
-                            self.left();
-                        }
-                        else{
-                            self.leftOff();
-                        }
-                        break;
-                    case DirectionKeyDirection.RIGHT:
-                        if(directionKey.isKeyDown){
-                            self.right();
-                        }
-                        else{
-                            self.rightOff();
-                        }
-                        break;
-                }
+
+                var directionKeyMap: DirectionKeyToFunc[] = [
+                    new DirectionKeyToFunc(DirectionKeyDirection.UP, true, () => self.forward()),
+                    new DirectionKeyToFunc(DirectionKeyDirection.UP, false, () => self.forwardOff()),
+                    new DirectionKeyToFunc(DirectionKeyDirection.DOWN, true, () => self.backward()),
+                    new DirectionKeyToFunc(DirectionKeyDirection.DOWN, false, () => self.backwardOff()),
+                    new DirectionKeyToFunc(DirectionKeyDirection.LEFT, true, () => self.left()),
+                    new DirectionKeyToFunc(DirectionKeyDirection.LEFT, false, () => self.leftOff()),
+                    new DirectionKeyToFunc(DirectionKeyDirection.RIGHT, true, () => self.right()),
+                    new DirectionKeyToFunc(DirectionKeyDirection.RIGHT, false, () =>  self.rightOff())
+                ];
+                directionKeyMap.filter(dk => dk.matchesCommand(directionKey)).forEach(dk => dk.func());
                 break;
             case SET_FULL_STATE_COMMAND_NAME:
                 var setFullState = <SetFullStateCommand>command;
@@ -75,8 +57,6 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
                     setFullState.speed,
                     setFullState.speedDifference);
                 break;
-            default:
-                break;
         }
 
         var robotEvents = self.unprocessedEvents;
@@ -85,7 +65,7 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         return robotEvents;
     }
 
-    private _lineMeasures: LineMeasure[];
+    private _lineMeasures: LineMeasureArrayMemory;
 
     private founds = 0;
     private losts = 0;
@@ -94,51 +74,17 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         var self = this;
 
         if(!this._lineMeasures){
-            this._lineMeasures = [];
-            for(var i = 0; i < sensation.totalLineSensors; i++){
-                this._lineMeasures.push(new LineMeasure(false));
-            }
+            this._lineMeasures = new LineMeasureArrayMemory(sensation.totalLineSensors, 5);
         }
 
-        console.log(sensation);
         switch(sensation.name){
-            // case LINE_FOUND_SENSATION_NAME:
-            //     this._lineMeasures[sensation.lineSensorId].value = true;
-
-            //     if(sensation.lineSensorId == 0){
-            //         this.adjustLeft(0.5 + this._leftMotorVelocity - this._rightMotorVelocity );
-            //     }
-            //     else{
-            //         this.adjustRight(Math.pow(1.1, this.founds) * 0.05 / (10 * this._leftMotorVelocity));
-            //     }
-
-            //     this.founds++;
-            //     this.losts = 0;
-
-            //     break;
-            // case LINE_LOST_SENSATION_NAME:
-            //     this._lineMeasures[sensation.lineSensorId].value = false;
-                
-            //     if(sensation.lineSensorId == 5){
-            //         this.adjustRight(0.5 + this._rightMotorVelocity - this._leftMotorVelocity);
-            //     }{
-            //     this.adjustLeft(Math.pow(1.1, this.losts) * 0.05 / (10 * this._rightMotorVelocity));
-            //     }
-
-            //     this.losts++;
-            //     this.founds = 0;
-
-            //     break;
-
             case LINE_FOUND_SENSATION_NAME:
-                this._lineMeasures[sensation.lineSensorId].value = true;
-                this.adjust(this.getLinePosition());
-                
+                this._lineMeasures.setValue(sensation.lineSensorId, true); 
+                this.adjust(this._lineMeasures.getLinePosition());
                 break;
             case LINE_LOST_SENSATION_NAME:
-                this._lineMeasures[sensation.lineSensorId].value = false;
-                this.adjust(this.getLinePosition());
-
+                this._lineMeasures.setValue(sensation.lineSensorId, false);
+                this.adjust(this._lineMeasures.getLinePosition());
                 break;
         }
 
@@ -146,26 +92,6 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         self.unprocessedEvents = [];
 
         return robotEvents;
-    }
-
-    getLinePosition(){
-        var ons = [];
-        for(var i = 0; i < this._lineMeasures.length; i++){
-            if(this._lineMeasures[i].value== true){
-                ons.push(i);
-            }
-        }
-        var sum = 0;
-        if(ons.length == 0){
-            return 0;
-        }
-        ons.forEach(o => sum+=o);
-        var average = sum / this._lineMeasures.length;
-
-        // -1 for left to +1 for right
-        var normalised = 2 * average / (ons.length) - 1;
-
-        return normalised;
     }
 
     apply(robotEvent: IAmARobotEvent) {
@@ -323,23 +249,68 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         this._onExtraEventsAdded = func;
     }
 
-    adjust(amount: number){
-        console.log("adjust", amount);
+    private _reverseMode = false;
+    private _leftPreference = true;
+
+    private _timer: NodeJS.Timer;
+
+    adjust(vector: Vector2d){
         var self = this;
-        if(amount < 0){
-            self.adjustTurnLeft(0.3 * Math.abs(amount));
+
+        if(this._reverseMode == true){
+            return;
         }
 
-        if(amount > 0){
-            self.adjustTurnRight(0.3 * Math.abs(amount));
+        if(self._timer){
+            clearTimeout(self._timer);
         }
 
-        setTimeout(() => {
+        if(vector.y < 0){
+            self._reverseMode = true;               
+
+            var preferenceTested = Math.abs(vector.x) < 0.2 ? 
+                self._leftPreference ? -1 : 1 : vector.x;
+
+            self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, -0.1));
+            self._onExtraEventsAdded(new MotorSpeedSetEvent(self.rightMotorId, -0.1));
+
+            console.log("reverse!");         
+
+            self._timer = setTimeout(() => {
+                if(vector.x < 0){
+                    self.adjustTurnLeft(0.5 * Math.abs(preferenceTested));
+                }
+        
+                if(vector.x > 0){
+                    self.adjustTurnRight(0.5 * Math.abs(preferenceTested));
+                }
+
+                self._timer = setTimeout(() => {
+                    if(self._onExtraEventsAdded){
+                        self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, 0.15));
+                        self._onExtraEventsAdded(new MotorSpeedSetEvent(self.rightMotorId, 0.15));
+                    }
+
+                    self._reverseMode = false;
+                }, 400 * Math.abs(preferenceTested));
+            }, 200);
+            return;
+        }
+
+        if(vector.x < 0){
+            self.adjustTurnLeft(0.5 * Math.abs(vector.x));
+        }
+
+        if(vector.x > 0){
+            self.adjustTurnRight(0.5 * Math.abs(vector.x));
+        }
+
+        self._timer = setTimeout(() => {
             if(self._onExtraEventsAdded){
-                self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, 0.1));
-                self._onExtraEventsAdded(new MotorSpeedSetEvent(self.rightMotorId, 0.1));
+                self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, 0.15));
+                self._onExtraEventsAdded(new MotorSpeedSetEvent(self.rightMotorId, 0.15));
             }
-        }, 100 * Math.abs(amount));
+        }, 100 * Math.abs(vector.x));
     }
 
     setSpeed(newSpeed) {

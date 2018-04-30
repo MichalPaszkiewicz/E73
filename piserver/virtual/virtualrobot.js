@@ -348,7 +348,6 @@ System.register("hats/linesensor/linesensor", ["framework/enums/pinstate", "fram
                     }
                     self._watchDefined = true;
                     self._pin.watch((err, val) => {
-                        console.log(val);
                         if (self._reversed ? val == 0 : val == 1) {
                             callback(new linefoundsensation_1.LineFoundSensation(self.id, 1));
                         }
@@ -719,10 +718,267 @@ System.register("aggregateroots/valueobjects/linemeasure", [], function (exports
         }
     };
 });
-System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutation", "commands/trimleftcommand", "commands/trimrightcommand", "commands/directionkeycommand", "hats/motozero/events/motorspeedsetevent", "hats/motozero/events/motorturnedoffevent", "commands/setfullstatecommand", "framework/events/turnedoffevent", "hats/linesensor/sensations/linefoundsensation", "hats/linesensor/sensations/linelostsensation", "aggregateroots/valueobjects/linemeasure"], function (exports_38, context_38) {
+System.register("aggregateroots/directionkeytofunc", [], function (exports_38, context_38) {
     "use strict";
     var __moduleName = context_38 && context_38.id;
-    var controlpermutation_1, trimleftcommand_1, trimrightcommand_1, directionkeycommand_1, motorspeedsetevent_1, motorturnedoffevent_1, setfullstatecommand_1, turnedoffevent_1, linefoundsensation_2, linelostsensation_2, linemeasure_1, TwoWheelDrive;
+    var DirectionKeyToFunc;
+    return {
+        setters: [],
+        execute: function () {
+            DirectionKeyToFunc = class DirectionKeyToFunc {
+                constructor(direction, isKeyDown, func) {
+                    this.direction = direction;
+                    this.isKeyDown = isKeyDown;
+                    this.func = func;
+                }
+                matchesCommand(command) {
+                    return command.direction == this.direction && command.isKeyDown == this.isKeyDown;
+                }
+            };
+            exports_38("DirectionKeyToFunc", DirectionKeyToFunc);
+        }
+    };
+});
+System.register("aggregateroots/entities/linemeasurearray", ["aggregateroots/valueobjects/linemeasure"], function (exports_39, context_39) {
+    "use strict";
+    var __moduleName = context_39 && context_39.id;
+    var linemeasure_1, LineMeasureArray;
+    return {
+        setters: [
+            function (linemeasure_1_1) {
+                linemeasure_1 = linemeasure_1_1;
+            }
+        ],
+        execute: function () {
+            LineMeasureArray = class LineMeasureArray {
+                constructor(size) {
+                    this.size = size;
+                    this._lineMeasures = [];
+                    for (var i = 0; i < size; i++) {
+                        this._lineMeasures.push(new linemeasure_1.LineMeasure(false));
+                    }
+                }
+                setValue(index, value) {
+                    this._lineMeasures[index].value = value;
+                }
+                clone() {
+                    var newLineMeasureArray = new LineMeasureArray(this.size);
+                    for (var i = 0; i < this._lineMeasures.length; i++) {
+                        newLineMeasureArray.setValue(i, this._lineMeasures[i].value);
+                    }
+                    return newLineMeasureArray;
+                }
+                getLinePosition() {
+                    var ons = [];
+                    for (var i = 0; i < this._lineMeasures.length; i++) {
+                        if (this._lineMeasures[i].value == true) {
+                            ons.push(i);
+                        }
+                    }
+                    var sum = 0;
+                    if (ons.length == 0) {
+                        return 0;
+                    }
+                    ons.forEach(o => sum += o);
+                    var average = sum / this._lineMeasures.length;
+                    // -1 for left to +1 for right
+                    var normalised = 2 * average / (ons.length) - 1;
+                    return normalised;
+                }
+                getValues() {
+                    return this._lineMeasures.map(lm => lm.value);
+                }
+                getGroupings() {
+                    var groups = [];
+                    var groupNum = 0;
+                    for (var i = 0; i < this._lineMeasures.length; i++) {
+                        if (this._lineMeasures[i].value == true) {
+                            if (groups[groupNum] == undefined) {
+                                groups.push([]);
+                            }
+                            groups[groupNum].push(i);
+                        }
+                        else {
+                            if (groups[groupNum] && groups.length > 0 && groups[groupNum].length > 0) {
+                                groupNum++;
+                            }
+                        }
+                    }
+                    return groups;
+                }
+            };
+            exports_39("LineMeasureArray", LineMeasureArray);
+        }
+    };
+});
+System.register("helpers/vector", [], function (exports_40, context_40) {
+    "use strict";
+    var __moduleName = context_40 && context_40.id;
+    var Vector2d;
+    return {
+        setters: [],
+        execute: function () {
+            Vector2d = class Vector2d {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                }
+                add(vector) {
+                    return new Vector2d(this.x + vector.x, this.y + vector.y);
+                }
+                dot(vector) {
+                    return new Vector2d(this.x * vector.x, this.y + vector.y);
+                }
+                getModulus() {
+                    return Math.sqrt(this.x * this.x + this.y * this.y);
+                }
+                multiplyBy(n) {
+                    return new Vector2d(this.x * n, this.y * n);
+                }
+                getUnitVector() {
+                    var modulus = this.getModulus();
+                    return new Vector2d(this.x / modulus, this.y / modulus);
+                }
+                getPerpendicularVector() {
+                    if (this.x == 0 && this.y == 0) {
+                        throw Error("Cannot find a vector perpendicular to (0,0,0)");
+                    }
+                    var unitVector = this.getUnitVector();
+                    return new Vector2d(-unitVector.y, unitVector.x);
+                }
+                rotate(radians) {
+                    return new Vector2d(this.x * Math.cos(radians) - this.y * Math.sin(radians), this.x * Math.sin(radians) + this.y * Math.cos(radians));
+                }
+                reverse() {
+                    return new Vector2d(-this.x, -this.y);
+                }
+            };
+            exports_40("Vector2d", Vector2d);
+        }
+    };
+});
+System.register("helpers/maths", [], function (exports_41, context_41) {
+    "use strict";
+    var __moduleName = context_41 && context_41.id;
+    var Maths;
+    return {
+        setters: [],
+        execute: function () {
+            Maths = class Maths {
+                static Average(numbers) {
+                    var total = 0;
+                    numbers.forEach(n => total += n);
+                    return total / numbers.length;
+                }
+                static MovingAverage(numbers) {
+                    var total = 0;
+                    numbers.forEach(n => total += n);
+                    return total / numbers.length;
+                }
+            };
+            exports_41("Maths", Maths);
+        }
+    };
+});
+System.register("aggregateroots/entities/linemeasurearraymemory", ["aggregateroots/entities/linemeasurearray", "helpers/vector", "helpers/maths"], function (exports_42, context_42) {
+    "use strict";
+    var __moduleName = context_42 && context_42.id;
+    var linemeasurearray_1, vector_1, maths_1, LineMeasureArrayMemory;
+    return {
+        setters: [
+            function (linemeasurearray_1_1) {
+                linemeasurearray_1 = linemeasurearray_1_1;
+            },
+            function (vector_1_1) {
+                vector_1 = vector_1_1;
+            },
+            function (maths_1_1) {
+                maths_1 = maths_1_1;
+            }
+        ],
+        execute: function () {
+            LineMeasureArrayMemory = class LineMeasureArrayMemory {
+                constructor(arraySize, memoryDepth) {
+                    this.arraySize = arraySize;
+                    this.memoryDepth = memoryDepth;
+                    this._lineMeasureArrays = [];
+                    if (memoryDepth < 2) {
+                        throw new Error("Line Measure Array Memory Depth must be 2 or more");
+                    }
+                    for (var i = 0; i < memoryDepth; i++) {
+                        this._lineMeasureArrays.push(new linemeasurearray_1.LineMeasureArray(arraySize));
+                    }
+                    this._realArrayState = new linemeasurearray_1.LineMeasureArray(arraySize);
+                }
+                getPreviousArray() {
+                    return this._lineMeasureArrays[this.memoryDepth - 2];
+                }
+                getLatestArray() {
+                    return this._lineMeasureArrays[this.memoryDepth - 1];
+                }
+                getLinePosition() {
+                    var self = this;
+                    var currentVals = self.getLatestArray().getValues();
+                    var isOnLine = currentVals.some(v => v == true);
+                    var lineMemoryAge = 0;
+                    var j = 0;
+                    for (var i = self._lineMeasureArrays.length - 2; i > -1; i--) {
+                        j--;
+                        if (self._lineMeasureArrays[i].getValues().some(v => v == true)) {
+                            lineMemoryAge = j;
+                        }
+                    }
+                    return new vector_1.Vector2d(maths_1.Maths.MovingAverage(self._lineMeasureArrays.map(lm => lm.getLinePosition())), isOnLine ? 0 : lineMemoryAge);
+                }
+                getValues() {
+                    return this.getLatestArray().getValues();
+                }
+                setValue(index, value) {
+                    this._realArrayState.setValue(index, value);
+                    var latestArrayVals = this.getLatestArray().getValues();
+                    var tempLineArray = this._realArrayState.clone();
+                    tempLineArray.setValue(index, value);
+                    var groupings = tempLineArray.getGroupings();
+                    if (!groupings || groupings.length == 0) {
+                        this._lineMeasureArrays.shift();
+                        this._lineMeasureArrays.push(tempLineArray);
+                        return;
+                    }
+                    var winningGrouping = null;
+                    var winningGroupingNum = 0;
+                    for (var i = 0; i < groupings.length; i++) {
+                        var groupScore = 0;
+                        for (var j = 0; j < groupings[i].length; j++) {
+                            if (latestArrayVals[groupings[i][j]]) {
+                                groupScore++;
+                            }
+                        }
+                        if (groupScore > winningGroupingNum) {
+                            winningGrouping = i;
+                            winningGroupingNum = groupScore;
+                        }
+                    }
+                    if (winningGrouping == null) {
+                        this._lineMeasureArrays.shift();
+                        this._lineMeasureArrays.push(tempLineArray);
+                        return;
+                    }
+                    var newLineArray = new linemeasurearray_1.LineMeasureArray(this.arraySize);
+                    for (var i = 0; i < groupings[winningGrouping].length; i++) {
+                        newLineArray.setValue(groupings[winningGrouping][i], true);
+                    }
+                    this._lineMeasureArrays.shift();
+                    this._lineMeasureArrays.push(newLineArray);
+                }
+            };
+            exports_42("LineMeasureArrayMemory", LineMeasureArrayMemory);
+        }
+    };
+});
+System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutation", "commands/trimleftcommand", "commands/trimrightcommand", "commands/directionkeycommand", "hats/motozero/events/motorspeedsetevent", "hats/motozero/events/motorturnedoffevent", "commands/setfullstatecommand", "framework/events/turnedoffevent", "hats/linesensor/sensations/linefoundsensation", "hats/linesensor/sensations/linelostsensation", "aggregateroots/directionkeytofunc", "aggregateroots/entities/linemeasurearraymemory"], function (exports_43, context_43) {
+    "use strict";
+    var __moduleName = context_43 && context_43.id;
+    var controlpermutation_1, trimleftcommand_1, trimrightcommand_1, directionkeycommand_1, motorspeedsetevent_1, motorturnedoffevent_1, setfullstatecommand_1, turnedoffevent_1, linefoundsensation_2, linelostsensation_2, directionkeytofunc_1, linemeasurearraymemory_1, TwoWheelDrive;
     return {
         setters: [
             function (controlpermutation_1_1) {
@@ -755,8 +1011,11 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
             function (linelostsensation_2_1) {
                 linelostsensation_2 = linelostsensation_2_1;
             },
-            function (linemeasure_1_1) {
-                linemeasure_1 = linemeasure_1_1;
+            function (directionkeytofunc_1_1) {
+                directionkeytofunc_1 = directionkeytofunc_1_1;
+            },
+            function (linemeasurearraymemory_1_1) {
+                linemeasurearraymemory_1 = linemeasurearraymemory_1_1;
             }
         ],
         execute: function () {
@@ -779,6 +1038,8 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     this._leftMotorVelocity = 0;
                     this._rightMotorVelocity = 0;
                     this.unprocessedEvents = [];
+                    this._reverseMode = false;
+                    this._leftPreference = true;
                 }
                 handle(command) {
                     var self = this;
@@ -791,46 +1052,21 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                             break;
                         case directionkeycommand_1.DIRECTION_KEY_COMMAND_NAME:
                             var directionKey = command;
-                            switch (directionKey.direction) {
-                                case directionkeycommand_1.DirectionKeyDirection.UP:
-                                    if (directionKey.isKeyDown) {
-                                        self.forward();
-                                    }
-                                    else {
-                                        self.forwardOff();
-                                    }
-                                    break;
-                                case directionkeycommand_1.DirectionKeyDirection.DOWN:
-                                    if (directionKey.isKeyDown) {
-                                        self.backward();
-                                    }
-                                    else {
-                                        self.backwardOff();
-                                    }
-                                    break;
-                                case directionkeycommand_1.DirectionKeyDirection.LEFT:
-                                    if (directionKey.isKeyDown) {
-                                        self.left();
-                                    }
-                                    else {
-                                        self.leftOff();
-                                    }
-                                    break;
-                                case directionkeycommand_1.DirectionKeyDirection.RIGHT:
-                                    if (directionKey.isKeyDown) {
-                                        self.right();
-                                    }
-                                    else {
-                                        self.rightOff();
-                                    }
-                                    break;
-                            }
+                            var directionKeyMap = [
+                                new directionkeytofunc_1.DirectionKeyToFunc(directionkeycommand_1.DirectionKeyDirection.UP, true, () => self.forward()),
+                                new directionkeytofunc_1.DirectionKeyToFunc(directionkeycommand_1.DirectionKeyDirection.UP, false, () => self.forwardOff()),
+                                new directionkeytofunc_1.DirectionKeyToFunc(directionkeycommand_1.DirectionKeyDirection.DOWN, true, () => self.backward()),
+                                new directionkeytofunc_1.DirectionKeyToFunc(directionkeycommand_1.DirectionKeyDirection.DOWN, false, () => self.backwardOff()),
+                                new directionkeytofunc_1.DirectionKeyToFunc(directionkeycommand_1.DirectionKeyDirection.LEFT, true, () => self.left()),
+                                new directionkeytofunc_1.DirectionKeyToFunc(directionkeycommand_1.DirectionKeyDirection.LEFT, false, () => self.leftOff()),
+                                new directionkeytofunc_1.DirectionKeyToFunc(directionkeycommand_1.DirectionKeyDirection.RIGHT, true, () => self.right()),
+                                new directionkeytofunc_1.DirectionKeyToFunc(directionkeycommand_1.DirectionKeyDirection.RIGHT, false, () => self.rightOff())
+                            ];
+                            directionKeyMap.filter(dk => dk.matchesCommand(directionKey)).forEach(dk => dk.func());
                             break;
                         case setfullstatecommand_1.SET_FULL_STATE_COMMAND_NAME:
                             var setFullState = command;
                             self.setFullState(setFullState.forwardOn, setFullState.backwardOn, setFullState.leftOn, setFullState.rightOn, setFullState.speed, setFullState.speedDifference);
-                            break;
-                        default:
                             break;
                     }
                     var robotEvents = self.unprocessedEvents;
@@ -840,63 +1076,21 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                 sense(sensation) {
                     var self = this;
                     if (!this._lineMeasures) {
-                        this._lineMeasures = [];
-                        for (var i = 0; i < sensation.totalLineSensors; i++) {
-                            this._lineMeasures.push(new linemeasure_1.LineMeasure(false));
-                        }
+                        this._lineMeasures = new linemeasurearraymemory_1.LineMeasureArrayMemory(sensation.totalLineSensors, 5);
                     }
-                    console.log(sensation);
                     switch (sensation.name) {
-                        // case LINE_FOUND_SENSATION_NAME:
-                        //     this._lineMeasures[sensation.lineSensorId].value = true;
-                        //     if(sensation.lineSensorId == 0){
-                        //         this.adjustLeft(0.5 + this._leftMotorVelocity - this._rightMotorVelocity );
-                        //     }
-                        //     else{
-                        //         this.adjustRight(Math.pow(1.1, this.founds) * 0.05 / (10 * this._leftMotorVelocity));
-                        //     }
-                        //     this.founds++;
-                        //     this.losts = 0;
-                        //     break;
-                        // case LINE_LOST_SENSATION_NAME:
-                        //     this._lineMeasures[sensation.lineSensorId].value = false;
-                        //     if(sensation.lineSensorId == 5){
-                        //         this.adjustRight(0.5 + this._rightMotorVelocity - this._leftMotorVelocity);
-                        //     }{
-                        //     this.adjustLeft(Math.pow(1.1, this.losts) * 0.05 / (10 * this._rightMotorVelocity));
-                        //     }
-                        //     this.losts++;
-                        //     this.founds = 0;
-                        //     break;
                         case linefoundsensation_2.LINE_FOUND_SENSATION_NAME:
-                            this._lineMeasures[sensation.lineSensorId].value = true;
-                            this.adjust(this.getLinePosition());
+                            this._lineMeasures.setValue(sensation.lineSensorId, true);
+                            this.adjust(this._lineMeasures.getLinePosition());
                             break;
                         case linelostsensation_2.LINE_LOST_SENSATION_NAME:
-                            this._lineMeasures[sensation.lineSensorId].value = false;
-                            this.adjust(this.getLinePosition());
+                            this._lineMeasures.setValue(sensation.lineSensorId, false);
+                            this.adjust(this._lineMeasures.getLinePosition());
                             break;
                     }
                     var robotEvents = self.unprocessedEvents;
                     self.unprocessedEvents = [];
                     return robotEvents;
-                }
-                getLinePosition() {
-                    var ons = [];
-                    for (var i = 0; i < this._lineMeasures.length; i++) {
-                        if (this._lineMeasures[i].value == true) {
-                            ons.push(i);
-                        }
-                    }
-                    var sum = 0;
-                    if (ons.length == 0) {
-                        return 0;
-                    }
-                    ons.forEach(o => sum += o);
-                    var average = sum / this._lineMeasures.length;
-                    // -1 for left to +1 for right
-                    var normalised = 2 * average / (ons.length) - 1;
-                    return normalised;
                 }
                 apply(robotEvent) {
                     switch (robotEvent.name) {
@@ -1015,21 +1209,50 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                 registerOnExtraEventsAdded(func) {
                     this._onExtraEventsAdded = func;
                 }
-                adjust(amount) {
-                    console.log("adjust", amount);
+                adjust(vector) {
                     var self = this;
-                    if (amount < 0) {
-                        self.adjustTurnLeft(0.3 * Math.abs(amount));
+                    if (this._reverseMode == true) {
+                        return;
                     }
-                    if (amount > 0) {
-                        self.adjustTurnRight(0.3 * Math.abs(amount));
+                    if (self._timer) {
+                        clearTimeout(self._timer);
                     }
-                    setTimeout(() => {
+                    if (vector.y < 0) {
+                        self._reverseMode = true;
+                        var preferenceTested = Math.abs(vector.x) < 0.2 ?
+                            self._leftPreference ? -1 : 1 : vector.x;
+                        self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, -0.1));
+                        self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, -0.1));
+                        console.log("reverse!");
+                        self._timer = setTimeout(() => {
+                            if (vector.x < 0) {
+                                self.adjustTurnLeft(0.5 * Math.abs(preferenceTested));
+                            }
+                            if (vector.x > 0) {
+                                self.adjustTurnRight(0.5 * Math.abs(preferenceTested));
+                            }
+                            self._timer = setTimeout(() => {
+                                if (self._onExtraEventsAdded) {
+                                    self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, 0.15));
+                                    self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, 0.15));
+                                }
+                                self._reverseMode = false;
+                            }, 400 * Math.abs(preferenceTested));
+                        }, 200);
+                        return;
+                    }
+                    if (vector.x < 0) {
+                        self.adjustTurnLeft(0.5 * Math.abs(vector.x));
+                    }
+                    if (vector.x > 0) {
+                        self.adjustTurnRight(0.5 * Math.abs(vector.x));
+                    }
+                    self._timer = setTimeout(() => {
                         if (self._onExtraEventsAdded) {
-                            self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, 0.1));
-                            self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, 0.1));
+                            self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, 0.15));
+                            self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, 0.15));
                         }
-                    }, 100 * Math.abs(amount));
+                    }, 100 * Math.abs(vector.x));
                 }
                 setSpeed(newSpeed) {
                     this._speed = newSpeed;
@@ -1077,13 +1300,13 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     this._updateMotors();
                 }
             };
-            exports_38("TwoWheelDrive", TwoWheelDrive);
+            exports_43("TwoWheelDrive", TwoWheelDrive);
         }
     };
 });
-System.register("sensationhandlers/linesensationhandler", ["hats/linesensor/sensations/linefoundsensation", "hats/linesensor/sensations/linelostsensation", "aggregateroots/twowheeldrive"], function (exports_39, context_39) {
+System.register("sensationhandlers/linesensationhandler", ["hats/linesensor/sensations/linefoundsensation", "hats/linesensor/sensations/linelostsensation", "aggregateroots/twowheeldrive"], function (exports_44, context_44) {
     "use strict";
-    var __moduleName = context_39 && context_39.id;
+    var __moduleName = context_44 && context_44.id;
     var linefoundsensation_3, linelostsensation_3, twowheeldrive_1, LineSensationHandler;
     return {
         setters: [
@@ -1120,13 +1343,13 @@ System.register("sensationhandlers/linesensationhandler", ["hats/linesensor/sens
                     return robotEvents;
                 }
             };
-            exports_39("LineSensationHandler", LineSensationHandler);
+            exports_44("LineSensationHandler", LineSensationHandler);
         }
     };
 });
-System.register("hats/motozero/motor", ["framework/enums/pinstate"], function (exports_40, context_40) {
+System.register("hats/motozero/motor", ["framework/enums/pinstate"], function (exports_45, context_45) {
     "use strict";
-    var __moduleName = context_40 && context_40.id;
+    var __moduleName = context_45 && context_45.id;
     var pinstate_2, Motor;
     return {
         setters: [
@@ -1188,13 +1411,13 @@ System.register("hats/motozero/motor", ["framework/enums/pinstate"], function (e
                     this._speed = newSpeed;
                 }
             };
-            exports_40("Motor", Motor);
+            exports_45("Motor", Motor);
         }
     };
 });
-System.register("hats/motozero/motoreventhandler", ["hats/motozero/events/motorturnedoffevent", "hats/motozero/events/motorspeedsetevent", "framework/events/turnedoffevent"], function (exports_41, context_41) {
+System.register("hats/motozero/motoreventhandler", ["hats/motozero/events/motorturnedoffevent", "hats/motozero/events/motorspeedsetevent", "framework/events/turnedoffevent"], function (exports_46, context_46) {
     "use strict";
-    var __moduleName = context_41 && context_41.id;
+    var __moduleName = context_46 && context_46.id;
     var motorturnedoffevent_2, motorspeedsetevent_2, turnedoffevent_2, MotorEventHandler;
     return {
         setters: [
@@ -1241,22 +1464,22 @@ System.register("hats/motozero/motoreventhandler", ["hats/motozero/events/motort
                     }
                 }
             };
-            exports_41("MotorEventHandler", MotorEventHandler);
+            exports_46("MotorEventHandler", MotorEventHandler);
         }
     };
 });
-System.register("hats/motozero/interfaces/iamamotorfactory", [], function (exports_42, context_42) {
+System.register("hats/motozero/interfaces/iamamotorfactory", [], function (exports_47, context_47) {
     "use strict";
-    var __moduleName = context_42 && context_42.id;
+    var __moduleName = context_47 && context_47.id;
     return {
         setters: [],
         execute: function () {
         }
     };
 });
-System.register("hats/motozero/fakemotorfactory", ["hats/motozero/motor", "services/fakepinfactory"], function (exports_43, context_43) {
+System.register("hats/motozero/fakemotorfactory", ["hats/motozero/motor", "services/fakepinfactory"], function (exports_48, context_48) {
     "use strict";
-    var __moduleName = context_43 && context_43.id;
+    var __moduleName = context_48 && context_48.id;
     var motor_1, fakepinfactory_1, fakeMotorFactory;
     return {
         setters: [
@@ -1268,13 +1491,13 @@ System.register("hats/motozero/fakemotorfactory", ["hats/motozero/motor", "servi
             }
         ],
         execute: function () {
-            exports_43("fakeMotorFactory", fakeMotorFactory = (motorId, enablePin, forwardPin, backwardPin) => new motor_1.Motor(motorId, enablePin, forwardPin, backwardPin, fakepinfactory_1.fakePinFactory));
+            exports_48("fakeMotorFactory", fakeMotorFactory = (motorId, enablePin, forwardPin, backwardPin) => new motor_1.Motor(motorId, enablePin, forwardPin, backwardPin, fakepinfactory_1.fakePinFactory));
         }
     };
 });
-System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/directionkeycommand", "commands/trimleftcommand", "commands/trimrightcommand", "aggregateroots/twowheeldrive", "commands/setfullstatecommand"], function (exports_44, context_44) {
+System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/directionkeycommand", "commands/trimleftcommand", "commands/trimrightcommand", "aggregateroots/twowheeldrive", "commands/setfullstatecommand"], function (exports_49, context_49) {
     "use strict";
-    var __moduleName = context_44 && context_44.id;
+    var __moduleName = context_49 && context_49.id;
     var directionkeycommand_2, trimleftcommand_2, trimrightcommand_2, twowheeldrive_2, setfullstatecommand_2, TwoWheelDriveCommandHandler;
     return {
         setters: [
@@ -1313,13 +1536,13 @@ System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/direct
                     return robotEvents;
                 }
             };
-            exports_44("TwoWheelDriveCommandHandler", TwoWheelDriveCommandHandler);
+            exports_49("TwoWheelDriveCommandHandler", TwoWheelDriveCommandHandler);
         }
     };
 });
-System.register("objects/learnableevent", [], function (exports_45, context_45) {
+System.register("objects/learnableevent", [], function (exports_50, context_50) {
     "use strict";
-    var __moduleName = context_45 && context_45.id;
+    var __moduleName = context_50 && context_50.id;
     var LearnableEvent;
     return {
         setters: [],
@@ -1330,13 +1553,13 @@ System.register("objects/learnableevent", [], function (exports_45, context_45) 
                     this.waitTime = waitTime;
                 }
             };
-            exports_45("LearnableEvent", LearnableEvent);
+            exports_50("LearnableEvent", LearnableEvent);
         }
     };
 });
-System.register("objects/learnablesequence", [], function (exports_46, context_46) {
+System.register("objects/learnablesequence", [], function (exports_51, context_51) {
     "use strict";
-    var __moduleName = context_46 && context_46.id;
+    var __moduleName = context_51 && context_51.id;
     var LearnableSequence;
     return {
         setters: [],
@@ -1347,66 +1570,66 @@ System.register("objects/learnablesequence", [], function (exports_46, context_4
                     this.events = events;
                 }
             };
-            exports_46("LearnableSequence", LearnableSequence);
+            exports_51("LearnableSequence", LearnableSequence);
         }
     };
 });
-System.register("commands/startlearningcommand", [], function (exports_47, context_47) {
+System.register("commands/startlearningcommand", [], function (exports_52, context_52) {
     "use strict";
-    var __moduleName = context_47 && context_47.id;
+    var __moduleName = context_52 && context_52.id;
     var START_LEARNING_COMMAND_NAME, StartLearningCommand;
     return {
         setters: [],
         execute: function () {
-            exports_47("START_LEARNING_COMMAND_NAME", START_LEARNING_COMMAND_NAME = "StartLearning");
+            exports_52("START_LEARNING_COMMAND_NAME", START_LEARNING_COMMAND_NAME = "StartLearning");
             StartLearningCommand = class StartLearningCommand {
                 constructor(sequenceName) {
                     this.sequenceName = sequenceName;
                     this.name = START_LEARNING_COMMAND_NAME;
                 }
             };
-            exports_47("StartLearningCommand", StartLearningCommand);
+            exports_52("StartLearningCommand", StartLearningCommand);
         }
     };
 });
-System.register("commands/endlearningcommand", [], function (exports_48, context_48) {
+System.register("commands/endlearningcommand", [], function (exports_53, context_53) {
     "use strict";
-    var __moduleName = context_48 && context_48.id;
+    var __moduleName = context_53 && context_53.id;
     var END_LEARNING_COMMAND_NAME, EndLearningCommand;
     return {
         setters: [],
         execute: function () {
-            exports_48("END_LEARNING_COMMAND_NAME", END_LEARNING_COMMAND_NAME = "EndLearning");
+            exports_53("END_LEARNING_COMMAND_NAME", END_LEARNING_COMMAND_NAME = "EndLearning");
             EndLearningCommand = class EndLearningCommand {
                 constructor() {
                     this.name = END_LEARNING_COMMAND_NAME;
                 }
             };
-            exports_48("EndLearningCommand", EndLearningCommand);
+            exports_53("EndLearningCommand", EndLearningCommand);
         }
     };
 });
-System.register("commands/runlearntsequencecommand", [], function (exports_49, context_49) {
+System.register("commands/runlearntsequencecommand", [], function (exports_54, context_54) {
     "use strict";
-    var __moduleName = context_49 && context_49.id;
+    var __moduleName = context_54 && context_54.id;
     var RUN_LEARNT_SEQUENCE_COMMAND_NAME, RunLearntSequenceCommand;
     return {
         setters: [],
         execute: function () {
-            exports_49("RUN_LEARNT_SEQUENCE_COMMAND_NAME", RUN_LEARNT_SEQUENCE_COMMAND_NAME = "RunLearntSequence");
+            exports_54("RUN_LEARNT_SEQUENCE_COMMAND_NAME", RUN_LEARNT_SEQUENCE_COMMAND_NAME = "RunLearntSequence");
             RunLearntSequenceCommand = class RunLearntSequenceCommand {
                 constructor(sequenceName) {
                     this.sequenceName = sequenceName;
                     this.name = RUN_LEARNT_SEQUENCE_COMMAND_NAME;
                 }
             };
-            exports_49("RunLearntSequenceCommand", RunLearntSequenceCommand);
+            exports_54("RunLearntSequenceCommand", RunLearntSequenceCommand);
         }
     };
 });
-System.register("services/learningservice", ["objects/learnableevent", "objects/learnablesequence", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand"], function (exports_50, context_50) {
+System.register("services/learningservice", ["objects/learnableevent", "objects/learnablesequence", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand"], function (exports_55, context_55) {
     "use strict";
-    var __moduleName = context_50 && context_50.id;
+    var __moduleName = context_55 && context_55.id;
     var learnableevent_1, learnablesequence_1, startlearningcommand_1, endlearningcommand_1, runlearntsequencecommand_1, LearningServiceCommandHandler, LearningServiceEventHandler, LearningService;
     return {
         setters: [
@@ -1573,59 +1796,13 @@ System.register("services/learningservice", ["objects/learnableevent", "objects/
                     this._running = false;
                 }
             };
-            exports_50("LearningService", LearningService);
+            exports_55("LearningService", LearningService);
         }
     };
 });
-System.register("helpers/vector", [], function (exports_51, context_51) {
+System.register("services/touchservice", [], function (exports_56, context_56) {
     "use strict";
-    var __moduleName = context_51 && context_51.id;
-    var Vector2d;
-    return {
-        setters: [],
-        execute: function () {
-            Vector2d = class Vector2d {
-                constructor(x, y) {
-                    this.x = x;
-                    this.y = y;
-                }
-                add(vector) {
-                    return new Vector2d(this.x + vector.x, this.y + vector.y);
-                }
-                dot(vector) {
-                    return new Vector2d(this.x * vector.x, this.y + vector.y);
-                }
-                getModulus() {
-                    return Math.sqrt(this.x * this.x + this.y * this.y);
-                }
-                multiplyBy(n) {
-                    return new Vector2d(this.x * n, this.y * n);
-                }
-                getUnitVector() {
-                    var modulus = this.getModulus();
-                    return new Vector2d(this.x / modulus, this.y / modulus);
-                }
-                getPerpendicularVector() {
-                    if (this.x == 0 && this.y == 0) {
-                        throw Error("Cannot find a vector perpendicular to (0,0,0)");
-                    }
-                    var unitVector = this.getUnitVector();
-                    return new Vector2d(-unitVector.y, unitVector.x);
-                }
-                rotate(radians) {
-                    return new Vector2d(this.x * Math.cos(radians) - this.y * Math.sin(radians), this.x * Math.sin(radians) + this.y * Math.cos(radians));
-                }
-                reverse() {
-                    return new Vector2d(-this.x, -this.y);
-                }
-            };
-            exports_51("Vector2d", Vector2d);
-        }
-    };
-});
-System.register("services/touchservice", [], function (exports_52, context_52) {
-    "use strict";
-    var __moduleName = context_52 && context_52.id;
+    var __moduleName = context_56 && context_56.id;
     function copyTouch(touch, targetElement) {
         var target = targetElement.getBoundingClientRect();
         return new TouchCopy(touch.identifier, touch.pageX - target.left, touch.pageY - target.top);
@@ -1693,14 +1870,14 @@ System.register("services/touchservice", [], function (exports_52, context_52) {
                     this._onTouchDownEvents.push(callback);
                 }
             };
-            exports_52("TouchService", TouchService);
+            exports_56("TouchService", TouchService);
         }
     };
 });
-System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "hats/linesensor/linesensor", "hats/linesensor/linesensorarray", "framework/services/defaultcontrolmodule", "framework/services/defaultdomainservice", "sensationhandlers/linesensationhandler", "hats/motozero/motoreventhandler", "hats/motozero/fakemotorfactory", "commandhandlers/twowheeldrivecommandhandler", "commands/directionkeycommand", "services/learningservice", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand", "helpers/vector", "services/touchservice", "commands/setfullstatecommand"], function (exports_53, context_53) {
+System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "hats/linesensor/linesensor", "hats/linesensor/linesensorarray", "framework/services/defaultcontrolmodule", "framework/services/defaultdomainservice", "sensationhandlers/linesensationhandler", "hats/motozero/motoreventhandler", "hats/motozero/fakemotorfactory", "commandhandlers/twowheeldrivecommandhandler", "commands/directionkeycommand", "services/learningservice", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand", "helpers/vector", "services/touchservice", "commands/setfullstatecommand"], function (exports_57, context_57) {
     "use strict";
-    var __moduleName = context_53 && context_53.id;
-    var robot_1, fakepinfactory_2, linesensor_1, linesensorarray_1, defaultcontrolmodule_1, defaultdomainservice_1, linesensationhandler_1, motoreventhandler_1, fakemotorfactory_1, twowheeldrivecommandhandler_1, directionkeycommand_3, learningservice_1, startlearningcommand_2, endlearningcommand_2, runlearntsequencecommand_2, vector_1, touchservice_1, setfullstatecommand_3, domainService, controlModule, leftMotor, rightMotor, lineSensorArray, lineSensors, i, lineSensor, robot, keys, setKeyState, tryKeySwitch, learningService, canvas, ctx, checkPositionColour, MyLine, myLine, touchService, started, VirtualRobot, virtualRobot, run;
+    var __moduleName = context_57 && context_57.id;
+    var robot_1, fakepinfactory_2, linesensor_1, linesensorarray_1, defaultcontrolmodule_1, defaultdomainservice_1, linesensationhandler_1, motoreventhandler_1, fakemotorfactory_1, twowheeldrivecommandhandler_1, directionkeycommand_3, learningservice_1, startlearningcommand_2, endlearningcommand_2, runlearntsequencecommand_2, vector_2, touchservice_1, setfullstatecommand_3, domainService, controlModule, leftMotor, rightMotor, lineSensorArray, lineSensors, i, lineSensor, robot, keys, setKeyState, tryKeySwitch, learningService, canvas, ctx, checkPositionColour, MyLine, myLine, touchService, started, VirtualRobot, virtualRobot, run;
     return {
         setters: [
             function (robot_1_1) {
@@ -1748,8 +1925,8 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
             function (runlearntsequencecommand_2_1) {
                 runlearntsequencecommand_2 = runlearntsequencecommand_2_1;
             },
-            function (vector_1_1) {
-                vector_1 = vector_1_1;
+            function (vector_2_1) {
+                vector_2 = vector_2_1;
             },
             function (touchservice_1_1) {
                 touchservice_1 = touchservice_1_1;
@@ -1863,15 +2040,15 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
             };
             myLine = new MyLine();
             canvas.onclick = (e) => {
-                myLine.addPoint(new vector_1.Vector2d(e.offsetX, e.offsetY));
+                myLine.addPoint(new vector_2.Vector2d(e.offsetX, e.offsetY));
             };
             touchService = new touchservice_1.TouchService(canvas);
-            touchService.registerOnTouchDownEvent((e) => myLine.addPoint(new vector_1.Vector2d(e.offsetX, e.offsetY)));
+            touchService.registerOnTouchDownEvent((e) => myLine.addPoint(new vector_2.Vector2d(e.offsetX, e.offsetY)));
             started = false;
             VirtualRobot = class VirtualRobot {
                 constructor() {
-                    this.position = new vector_1.Vector2d(100, 100);
-                    this.direction = new vector_1.Vector2d(1, 1);
+                    this.position = new vector_2.Vector2d(100, 100);
+                    this.direction = new vector_2.Vector2d(1, 1);
                 }
                 draw() {
                     var self = this;
