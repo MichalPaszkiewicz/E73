@@ -198,8 +198,6 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
     }
 
     trimLeft() {
-        var trimRight = this._trimRight;
-        var trimLeft = this._trimLeft;
         if (this._trimRight > 0) {
             this._trimRight = Math.max(0, this._trimRight - this._trimIncrement);
         }
@@ -210,8 +208,6 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
     }
 
     trimRight() {
-        var trimRight = this._trimRight;
-        var trimLeft = this._trimLeft;
         if (this._trimLeft > 0) {
             this._trimLeft = Math.max(0, this._trimLeft - this._trimIncrement);
         }
@@ -222,24 +218,13 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
     }
 
     adjustTurnLeft(turnStrength: number){
-        var self = this;
-
-        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, -turnStrength));
-        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, turnStrength));
-
-        //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.max(-1, self._leftMotorVelocity - turnStrength)));
-        //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.min(1, self._rightMotorVelocity + turnStrength)));
+        this.unprocessedEvents.push(new MotorSpeedSetEvent(this.leftMotorId, -turnStrength));
+        this.unprocessedEvents.push(new MotorSpeedSetEvent(this.rightMotorId, turnStrength));
     }
 
     adjustTurnRight(turnStrength: number){
-        var self = this;
-
-        
-        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, turnStrength));
-        self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, -turnStrength));
-
-        //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.max(-1, self._rightMotorVelocity - turnStrength)));
-        //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.min(1, self._leftMotorVelocity + turnStrength)));
+        this.unprocessedEvents.push(new MotorSpeedSetEvent(this.leftMotorId, turnStrength));
+        this.unprocessedEvents.push(new MotorSpeedSetEvent(this.rightMotorId, -turnStrength));
     }
 
 
@@ -260,11 +245,9 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         if(this._reverseMode == true){
             return;
         }
-
         if(self._timer){
             clearTimeout(self._timer);
         }
-
         if(vector.y < 0){
             self._reverseMode = true;
             
@@ -277,17 +260,13 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
             self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, -0.1));
             self._onExtraEventsAdded(new MotorSpeedSetEvent(self.rightMotorId, -0.1));
 
-            console.log("reverse!");         
-
             self._timer = setTimeout(() => {
                 if(vector.x < 0){
                     self.adjustTurnLeft(0.5 * Math.abs(preferenceTested));
                 }
-        
                 if(vector.x > 0){
                     self.adjustTurnRight(0.5 * Math.abs(preferenceTested));
                 }
-
                 self._timer = setTimeout(() => {
                     if(self._onExtraEventsAdded){
                         self._onExtraEventsAdded(new MotorSpeedSetEvent(self.leftMotorId, 0.15));
@@ -303,7 +282,6 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         if(vector.x < 0){
             self.adjustTurnLeft(0.5 * Math.abs(vector.x));
         }
-
         if(vector.x > 0){
             self.adjustTurnRight(0.5 * Math.abs(vector.x));
         }
