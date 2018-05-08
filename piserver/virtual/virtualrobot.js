@@ -1195,8 +1195,6 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     self._updateMotor(self.rightMotorId, rightMotorVelocity);
                 }
                 trimLeft() {
-                    var trimRight = this._trimRight;
-                    var trimLeft = this._trimLeft;
                     if (this._trimRight > 0) {
                         this._trimRight = Math.max(0, this._trimRight - this._trimIncrement);
                     }
@@ -1206,8 +1204,6 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     this._updateMotors();
                 }
                 trimRight() {
-                    var trimRight = this._trimRight;
-                    var trimLeft = this._trimLeft;
                     if (this._trimLeft > 0) {
                         this._trimLeft = Math.max(0, this._trimLeft - this._trimIncrement);
                     }
@@ -1217,18 +1213,12 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     this._updateMotors();
                 }
                 adjustTurnLeft(turnStrength) {
-                    var self = this;
-                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, -turnStrength));
-                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, turnStrength));
-                    //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.max(-1, self._leftMotorVelocity - turnStrength)));
-                    //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.min(1, self._rightMotorVelocity + turnStrength)));
+                    this.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(this.leftMotorId, -turnStrength));
+                    this.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(this.rightMotorId, turnStrength));
                 }
                 adjustTurnRight(turnStrength) {
-                    var self = this;
-                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, turnStrength));
-                    self.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, -turnStrength));
-                    //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.rightMotorId, Math.max(-1, self._rightMotorVelocity - turnStrength)));
-                    //self.unprocessedEvents.push(new MotorSpeedSetEvent(self.leftMotorId, Math.min(1, self._leftMotorVelocity + turnStrength)));
+                    this.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(this.leftMotorId, turnStrength));
+                    this.unprocessedEvents.push(new motorspeedsetevent_1.MotorSpeedSetEvent(this.rightMotorId, -turnStrength));
                 }
                 registerOnExtraEventsAdded(func) {
                     this._onExtraEventsAdded = func;
@@ -1249,7 +1239,6 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                                 self._leftPreference ? -1 : 1 : vector.x;
                         self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.leftMotorId, -0.1));
                         self._onExtraEventsAdded(new motorspeedsetevent_1.MotorSpeedSetEvent(self.rightMotorId, -0.1));
-                        console.log("reverse!");
                         self._timer = setTimeout(() => {
                             if (vector.x < 0) {
                                 self.adjustTurnLeft(0.5 * Math.abs(preferenceTested));
@@ -1900,10 +1889,215 @@ System.register("services/touchservice", [], function (exports_56, context_56) {
         }
     };
 });
-System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "hats/linesensor/linesensor", "hats/linesensor/linesensorarray", "framework/services/defaultcontrolmodule", "framework/services/defaultdomainservice", "sensationhandlers/linesensationhandler", "hats/motozero/motoreventhandler", "hats/motozero/fakemotorfactory", "commandhandlers/twowheeldrivecommandhandler", "commands/directionkeycommand", "services/learningservice", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand", "helpers/vector", "services/touchservice", "commands/setfullstatecommand"], function (exports_57, context_57) {
+System.register("helpers/canvas", [], function (exports_57, context_57) {
     "use strict";
     var __moduleName = context_57 && context_57.id;
-    var robot_1, fakepinfactory_2, linesensor_1, linesensorarray_1, defaultcontrolmodule_1, defaultdomainservice_1, linesensationhandler_1, motoreventhandler_1, fakemotorfactory_1, twowheeldrivecommandhandler_1, directionkeycommand_3, learningservice_1, startlearningcommand_2, endlearningcommand_2, runlearntsequencecommand_2, vector_2, touchservice_1, setfullstatecommand_3, domainService, controlModule, leftMotor, rightMotor, lineSensorArray, lineSensors, i, lineSensor, robot, keys, setKeyState, tryKeySwitch, learningService, canvas, ctx, checkPositionColour, MyLine, myLine, touchService, started, VirtualRobot, virtualRobot, run;
+    var checkPositionColour;
+    return {
+        setters: [],
+        execute: function () {
+            exports_57("checkPositionColour", checkPositionColour = (context, v) => {
+                var imgData = context.getImageData(v.x, v.y, 1, 1).data;
+                return imgData[0] > 200 && imgData[1] == 0 && imgData[2] == 0;
+            });
+        }
+    };
+});
+System.register("drawings/virtualrobot", ["helpers/vector", "helpers/canvas", "commands/setfullstatecommand"], function (exports_58, context_58) {
+    "use strict";
+    var __moduleName = context_58 && context_58.id;
+    var vector_2, canvas_1, setfullstatecommand_3, VirtualRobot;
+    return {
+        setters: [
+            function (vector_2_1) {
+                vector_2 = vector_2_1;
+            },
+            function (canvas_1_1) {
+                canvas_1 = canvas_1_1;
+            },
+            function (setfullstatecommand_3_1) {
+                setfullstatecommand_3 = setfullstatecommand_3_1;
+            }
+        ],
+        execute: function () {
+            VirtualRobot = class VirtualRobot {
+                constructor(lineSensorArray) {
+                    this.lineSensorArray = lineSensorArray;
+                    this.position = new vector_2.Vector2d(100, 100);
+                    this.direction = new vector_2.Vector2d(1, 1);
+                    this.started = false;
+                }
+                draw(context) {
+                    var self = this;
+                    context.beginPath();
+                    context.arc(self.position.x, self.position.y, 10, 0, 2 * Math.PI);
+                    context.stroke();
+                    context.beginPath();
+                    context.moveTo(self.position.x, self.position.y);
+                    var frontPoint = self.position.add(self.direction.multiplyBy(30));
+                    context.lineTo(frontPoint.x, frontPoint.y);
+                    var rightFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32));
+                    var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
+                    context.moveTo(leftFront.x, leftFront.y);
+                    context.lineTo(rightFront.x, rightFront.y);
+                    context.stroke();
+                    context.closePath();
+                    var perp = self.direction.getPerpendicularVector().multiplyBy(64 / (this.lineSensorArray._lineSensors.length - 1));
+                    for (var i = 0; i < this.lineSensorArray._lineSensors.length; i++) {
+                        context.beginPath();
+                        var gr = 200 - 30 * i;
+                        context.fillStyle = `rgb(${gr},${gr},${gr})`;
+                        var pos = leftFront.add(perp.multiplyBy(i));
+                        context.arc(pos.x, pos.y, 3, 0, 2 * Math.PI);
+                        context.fill();
+                        context.closePath();
+                    }
+                }
+                update(context, controlModule, leftMotor, rightMotor) {
+                    var self = this;
+                    var leftSpeed = leftMotor.getSpeed() * 5;
+                    var rightSpeed = rightMotor.getSpeed() * 5;
+                    var frontPoint = self.position.add(self.direction.multiplyBy(30));
+                    var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
+                    var perp = self.direction.getPerpendicularVector().multiplyBy(64 / (this.lineSensorArray._lineSensors.length - 1));
+                    var pos = leftFront;
+                    for (var i = 0; i < this.lineSensorArray._lineSensors.length; i++) {
+                        var colourCheckPos = pos.add(self.direction.multiplyBy(2));
+                        var pin = this.lineSensorArray._lineSensors[i]._pin;
+                        var isLine = canvas_1.checkPositionColour(context, colourCheckPos) ? 1 : 0;
+                        if (isLine != pin.value()) {
+                            if (self.started == false) {
+                                controlModule.handle(new setfullstatecommand_3.SetFullStateCommand(true, false, false, false, 0.2, 0));
+                                self.started = true;
+                            }
+                            pin.triggerWatch(null, canvas_1.checkPositionColour(context, colourCheckPos) ? 1 : 0);
+                        }
+                        pos = pos.add(perp);
+                    }
+                    var leftVelocity = self.direction.multiplyBy(leftSpeed);
+                    var rightVelocity = self.direction.multiplyBy(rightSpeed);
+                    var averageVelocity = leftVelocity.add(rightVelocity).multiplyBy(0.5);
+                    var rotationAngle = (leftSpeed - rightSpeed) / 60;
+                    self.direction = self.direction.rotate(rotationAngle);
+                    self.position = self.position.add(averageVelocity);
+                }
+            };
+            exports_58("VirtualRobot", VirtualRobot);
+        }
+    };
+});
+System.register("drawings/myline", [], function (exports_59, context_59) {
+    "use strict";
+    var __moduleName = context_59 && context_59.id;
+    var MyLine;
+    return {
+        setters: [],
+        execute: function () {
+            MyLine = class MyLine {
+                constructor(lineWidth) {
+                    this.lineWidth = lineWidth;
+                    this.points = [];
+                }
+                addPoint(point) {
+                    this.points.push(point);
+                }
+                draw(context) {
+                    var self = this;
+                    if (this.points.length == 0) {
+                        return;
+                    }
+                    context.beginPath();
+                    context.strokeStyle = "rgb(255,0,0)";
+                    context.lineWidth = self.lineWidth;
+                    context.moveTo(this.points[0].x, this.points[0].y);
+                    for (var i = 1; i < this.points.length; i++) {
+                        context.lineTo(this.points[i].x, this.points[i].y);
+                    }
+                    context.stroke();
+                    context.closePath();
+                    context.strokeStyle = "black";
+                    context.lineWidth = 1;
+                }
+            };
+            exports_59("MyLine", MyLine);
+        }
+    };
+});
+System.register("userinterfaces/keyboard", ["commands/directionkeycommand", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand"], function (exports_60, context_60) {
+    "use strict";
+    var __moduleName = context_60 && context_60.id;
+    var directionkeycommand_3, startlearningcommand_2, endlearningcommand_2, runlearntsequencecommand_2, Keyboard;
+    return {
+        setters: [
+            function (directionkeycommand_3_1) {
+                directionkeycommand_3 = directionkeycommand_3_1;
+            },
+            function (startlearningcommand_2_1) {
+                startlearningcommand_2 = startlearningcommand_2_1;
+            },
+            function (endlearningcommand_2_1) {
+                endlearningcommand_2 = endlearningcommand_2_1;
+            },
+            function (runlearntsequencecommand_2_1) {
+                runlearntsequencecommand_2 = runlearntsequencecommand_2_1;
+            }
+        ],
+        execute: function () {
+            Keyboard = class Keyboard {
+                constructor() {
+                    this._onCommandedFuncs = [];
+                    this.keys = {};
+                    var self = this;
+                    document.onkeydown = e => self.tryKeySwitch(e.code, true);
+                    document.onkeyup = e => self.tryKeySwitch(e.code, false);
+                }
+                setKeyState(keyName, state) {
+                    if (this.keys[keyName] === state) {
+                        return;
+                    }
+                    this.keys[keyName] = state;
+                    this._onCommandedFuncs.forEach(ocf => ocf(new directionkeycommand_3.DirectionKeyCommand(keyName, state)));
+                }
+                tryKeySwitch(keyCode, value) {
+                    var self = this;
+                    switch (keyCode) {
+                        case "ArrowLeft":
+                            self.setKeyState("left", value);
+                            break;
+                        case "ArrowRight":
+                            self.setKeyState("right", value);
+                            break;
+                        case "ArrowUp":
+                            self.setKeyState("up", value);
+                            break;
+                        case "ArrowDown":
+                            self.setKeyState("down", value);
+                            break;
+                        case "KeyS":
+                            (value && self._onCommandedFuncs.forEach(ocf => ocf(new startlearningcommand_2.StartLearningCommand("test"))));
+                            break;
+                        case "KeyE":
+                            (value && self._onCommandedFuncs.forEach(ocf => ocf(new endlearningcommand_2.EndLearningCommand())));
+                            break;
+                        case "KeyR":
+                            (value && self._onCommandedFuncs.forEach(ocf => ocf(new runlearntsequencecommand_2.RunLearntSequenceCommand("test"))));
+                            break;
+                    }
+                }
+                registerOnCommanded(callback) {
+                    this._onCommandedFuncs.push(callback);
+                }
+                applyEvent(event) {
+                }
+            };
+            exports_60("Keyboard", Keyboard);
+        }
+    };
+});
+System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "hats/linesensor/linesensor", "hats/linesensor/linesensorarray", "framework/services/defaultcontrolmodule", "framework/services/defaultdomainservice", "sensationhandlers/linesensationhandler", "hats/motozero/motoreventhandler", "hats/motozero/fakemotorfactory", "commandhandlers/twowheeldrivecommandhandler", "services/learningservice", "helpers/vector", "services/touchservice", "drawings/virtualrobot", "drawings/myline", "userinterfaces/keyboard"], function (exports_61, context_61) {
+    "use strict";
+    var __moduleName = context_61 && context_61.id;
+    var robot_1, fakepinfactory_2, linesensor_1, linesensorarray_1, defaultcontrolmodule_1, defaultdomainservice_1, linesensationhandler_1, motoreventhandler_1, fakemotorfactory_1, twowheeldrivecommandhandler_1, learningservice_1, vector_3, touchservice_1, virtualrobot_1, myline_1, keyboard_1, domainService, controlModule, leftMotor, rightMotor, lineSensorArray, i, lineSensor, robot, learningService, canvas, ctx, myLine, touchService, virtualRobot, run;
     return {
         setters: [
             function (robot_1_1) {
@@ -1936,29 +2130,23 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
             function (twowheeldrivecommandhandler_1_1) {
                 twowheeldrivecommandhandler_1 = twowheeldrivecommandhandler_1_1;
             },
-            function (directionkeycommand_3_1) {
-                directionkeycommand_3 = directionkeycommand_3_1;
-            },
             function (learningservice_1_1) {
                 learningservice_1 = learningservice_1_1;
             },
-            function (startlearningcommand_2_1) {
-                startlearningcommand_2 = startlearningcommand_2_1;
-            },
-            function (endlearningcommand_2_1) {
-                endlearningcommand_2 = endlearningcommand_2_1;
-            },
-            function (runlearntsequencecommand_2_1) {
-                runlearntsequencecommand_2 = runlearntsequencecommand_2_1;
-            },
-            function (vector_2_1) {
-                vector_2 = vector_2_1;
+            function (vector_3_1) {
+                vector_3 = vector_3_1;
             },
             function (touchservice_1_1) {
                 touchservice_1 = touchservice_1_1;
             },
-            function (setfullstatecommand_3_1) {
-                setfullstatecommand_3 = setfullstatecommand_3_1;
+            function (virtualrobot_1_1) {
+                virtualrobot_1 = virtualrobot_1_1;
+            },
+            function (myline_1_1) {
+                myline_1 = myline_1_1;
+            },
+            function (keyboard_1_1) {
+                keyboard_1 = keyboard_1_1;
             }
         ],
         execute: function () {
@@ -1973,170 +2161,32 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
                 rightMotor
             ]));
             lineSensorArray = new linesensorarray_1.LineSensorArray();
-            lineSensors = [];
-            for (i = 0; i < 5; i++) {
+            for (i = 0; i < 7; i++) {
                 lineSensor = new linesensor_1.LineSensor(i, i, fakepinfactory_2.fakePinFactory);
                 lineSensorArray.registerLineSensor(lineSensor);
             }
-            //how to trigger a pin.
-            //(<FakePin>lineSensorArray._lineSensors[0]._pin).triggerWatch(null, 1);
-            // controlModule.registerCommandHandler({
-            // 	handles: ["*"],
-            // 	handle: (c => {
-            // 		console.log("command", c);
-            // 		return [];
-            // 	})
-            // });
-            // controlModule.registerRobotEventHandler({
-            //     handles: ["*"],
-            //     handle: (e => {
-            //         console.log("event", e);
-            //     })
-            // });
-            robot = new robot_1.Robot(controlModule, [], [
+            robot = new robot_1.Robot(controlModule, [
+                new keyboard_1.Keyboard()
+            ], [
                 lineSensorArray
             ]);
-            keys = [];
-            setKeyState = (keyName, state) => {
-                if (keys[keyName] === state) {
-                    return;
-                }
-                keys[keyName] = state;
-                controlModule.handle(new directionkeycommand_3.DirectionKeyCommand(keyName, state));
-            };
-            tryKeySwitch = (keyCode, value) => {
-                switch (keyCode) {
-                    case "ArrowLeft":
-                        setKeyState("left", value);
-                        break;
-                    case "ArrowRight":
-                        setKeyState("right", value);
-                        break;
-                    case "ArrowUp":
-                        setKeyState("up", value);
-                        break;
-                    case "ArrowDown":
-                        setKeyState("down", value);
-                        break;
-                    case "KeyS":
-                        (value && controlModule.handle(new startlearningcommand_2.StartLearningCommand("test")));
-                        break;
-                    case "KeyE":
-                        (value && controlModule.handle(new endlearningcommand_2.EndLearningCommand()));
-                        break;
-                    case "KeyR":
-                        (value && controlModule.handle(new runlearntsequencecommand_2.RunLearntSequenceCommand("test")));
-                        break;
-                }
-            };
             learningService = new learningservice_1.LearningService();
             learningService.attachToControlModule(controlModule);
             learningService.sequences = [];
-            document.onkeydown = e => tryKeySwitch(e.code, true);
-            document.onkeyup = e => tryKeySwitch(e.code, false);
             canvas = document.getElementById("myCanvas");
             ctx = canvas.getContext("2d");
-            checkPositionColour = (v) => {
-                var imgData = ctx.getImageData(v.x, v.y, 1, 1).data;
-                return imgData[0] > 200 && imgData[1] == 0 && imgData[2] == 0;
-            };
-            MyLine = class MyLine {
-                constructor() {
-                    this.points = [];
-                }
-                addPoint(point) {
-                    this.points.push(point);
-                }
-                draw() {
-                    if (this.points.length == 0) {
-                        return;
-                    }
-                    ctx.beginPath();
-                    ctx.strokeStyle = "rgb(255,0,0)";
-                    ctx.lineWidth = 30;
-                    ctx.moveTo(this.points[0].x, this.points[0].y);
-                    for (var i = 1; i < this.points.length; i++) {
-                        ctx.lineTo(this.points[i].x, this.points[i].y);
-                    }
-                    ctx.stroke();
-                    ctx.closePath();
-                    ctx.strokeStyle = "black";
-                    ctx.lineWidth = 1;
-                }
-            };
-            myLine = new MyLine();
+            myLine = new myline_1.MyLine(20);
             canvas.onclick = (e) => {
-                myLine.addPoint(new vector_2.Vector2d(e.offsetX, e.offsetY));
+                myLine.addPoint(new vector_3.Vector2d(e.offsetX, e.offsetY));
             };
             touchService = new touchservice_1.TouchService(canvas);
-            touchService.registerOnTouchDownEvent((e) => myLine.addPoint(new vector_2.Vector2d(e.offsetX, e.offsetY)));
-            started = false;
-            VirtualRobot = class VirtualRobot {
-                constructor() {
-                    this.position = new vector_2.Vector2d(100, 100);
-                    this.direction = new vector_2.Vector2d(1, 1);
-                }
-                draw() {
-                    var self = this;
-                    ctx.beginPath();
-                    ctx.arc(self.position.x, self.position.y, 10, 0, 2 * Math.PI);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(self.position.x, self.position.y);
-                    var frontPoint = self.position.add(self.direction.multiplyBy(30));
-                    ctx.lineTo(frontPoint.x, frontPoint.y);
-                    var rightFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32));
-                    var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
-                    ctx.moveTo(leftFront.x, leftFront.y);
-                    ctx.lineTo(rightFront.x, rightFront.y);
-                    ctx.stroke();
-                    ctx.closePath();
-                    var perp = self.direction.getPerpendicularVector().multiplyBy(16);
-                    for (var i = 0; i < 5; i++) {
-                        ctx.beginPath();
-                        var gr = 200 - 50 * i;
-                        ctx.fillStyle = `rgb(${gr},${gr},${gr})`;
-                        var pos = leftFront.add(perp.multiplyBy(i));
-                        ctx.arc(pos.x, pos.y, 3, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.closePath();
-                    }
-                }
-                update() {
-                    var self = this;
-                    var leftSpeed = leftMotor.getSpeed() * 5;
-                    var rightSpeed = rightMotor.getSpeed() * 5;
-                    var frontPoint = self.position.add(self.direction.multiplyBy(30));
-                    var leftFront = frontPoint.add(self.direction.getPerpendicularVector().multiplyBy(32).reverse());
-                    var perp = self.direction.getPerpendicularVector().multiplyBy(16);
-                    var pos = leftFront;
-                    for (var i = 0; i < 5; i++) {
-                        var colourCheckPos = pos.add(self.direction.multiplyBy(2));
-                        var pin = lineSensorArray._lineSensors[i]._pin;
-                        var isLine = checkPositionColour(colourCheckPos) ? 1 : 0;
-                        if (isLine != pin.value()) {
-                            if (started == false) {
-                                controlModule.handle(new setfullstatecommand_3.SetFullStateCommand(true, false, false, false, 0.2, 0));
-                                started = true;
-                            }
-                            pin.triggerWatch(null, checkPositionColour(colourCheckPos) ? 1 : 0);
-                        }
-                        pos = pos.add(perp);
-                    }
-                    var leftVelocity = self.direction.multiplyBy(leftSpeed);
-                    var rightVelocity = self.direction.multiplyBy(rightSpeed);
-                    var averageVelocity = leftVelocity.add(rightVelocity).multiplyBy(0.5);
-                    var rotationAngle = (leftSpeed - rightSpeed) / 60;
-                    self.direction = self.direction.rotate(rotationAngle);
-                    self.position = self.position.add(averageVelocity);
-                }
-            };
-            virtualRobot = new VirtualRobot();
+            touchService.registerOnTouchDownEvent((e) => myLine.addPoint(new vector_3.Vector2d(e.offsetX, e.offsetY)));
+            virtualRobot = new virtualrobot_1.VirtualRobot(lineSensorArray);
             run = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                myLine.draw();
-                virtualRobot.update();
-                virtualRobot.draw();
+                myLine.draw(ctx);
+                virtualRobot.update(ctx, controlModule, leftMotor, rightMotor);
+                virtualRobot.draw(ctx);
                 window.requestAnimationFrame(run);
             };
             run();

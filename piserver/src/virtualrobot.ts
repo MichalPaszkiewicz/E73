@@ -35,7 +35,7 @@ controlModule.registerRobotEventHandler(new MotorEventHandler([
 ]));
 
 var lineSensorArray = new LineSensorArray();
-for(var i = 0; i < 5; i++){
+for(var i = 0; i < 7; i++){
     var lineSensor = new LineSensor(i, i, fakePinFactory);
     lineSensorArray.registerLineSensor(lineSensor);
 }
@@ -62,12 +62,12 @@ canvas.onclick = (e) => {
 var touchService = new TouchService(canvas);
 touchService.registerOnTouchDownEvent((e) => myLine.addPoint(new Vector2d(e.offsetX, e.offsetY)));
 
-var virtualRobot = new VirtualRobot();
+var virtualRobot = new VirtualRobot(lineSensorArray);
 
 var run = () => {
     ctx.clearRect(0,0,canvas.width, canvas.height);
     myLine.draw(ctx);    
-    virtualRobot.update(ctx, controlModule, lineSensorArray, leftMotor, rightMotor);
+    virtualRobot.update(ctx, controlModule, leftMotor, rightMotor);
     virtualRobot.draw(ctx);
     window.requestAnimationFrame(run);    
 };
