@@ -1,7 +1,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 const tsc = require('typescript');
-const tsConfig = require('./buildtests/tsconfig.json');
+const tsConfig = require('./build/tests/tsconfig.json');
 
 module.exports = {
   process(src, path) {

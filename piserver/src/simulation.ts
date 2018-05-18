@@ -30,19 +30,8 @@ var controlModule = new DefaultControlModule(domainService);
 controlModule.registerRobotEventHandler(motorEventHandler);
 controlModule.registerCommandHandler(new TwoWheelDriveCommandHandler());
 
-controlModule.registerRobotEventHandler(new LogEventHandler());
-
 var learningService = new LearningService();
 learningService.attachToControlModule(controlModule);
-
-//for logging commands
-// controlModule.registerCommandHandler({
-// 	handles: ["*"],
-// 	handle: (c => {
-// 		console.log("command", c);
-// 		return [];
-// 	})
-// });
 
 var robot = new Robot(controlModule, [
 	httpService

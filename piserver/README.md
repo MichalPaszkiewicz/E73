@@ -14,9 +14,9 @@ run `npm install`
 
 If typescript is not installed (`tsc -v` returns error), run `npm install typescript -g`
 
-run `tsc -p buildclient`
+run `tsc -p build/client`
 
-run `tsc -p buildserver`
+run `tsc -p build/server`
 
 when finished, run `node dist/server.js`
 
@@ -52,7 +52,7 @@ There is an option for building and running a "simulation". This is essentially 
 
 To set it up:
 
-run `tsc -p buildsimulation`
+run `tsc -p build/simulation`
 
 run `node sim/simulation.js`
 
@@ -60,7 +60,7 @@ run `node sim/simulation.js`
 
 You can test out the virtual line tracker by putting this code on a machine with a decent browser.
 
-run `tsc -p buildvirtualrobot`
+run `tsc -p build/virtualrobot`
 
 And then open up "virtual.html". You can draw lines by clicking on the box. The robot will start moving when it first detects a line.
 

@@ -1,14 +1,14 @@
 {
     "compilerOptions": {
-        "outFile": "../virtual/virtualrobot.js",
+        "outDir": "../../dist/",
         "sourceMap": true,
         "noImplicitAny": false,
         "declaration": false,
-        "module": "system",
-        "target": "es6",
+        "module": "commonjs",
+        "target": "es5",
         "moduleResolution": "node"
     },
     "files": [
-        "../src/virtualrobot.ts"
+        "../../src/server.ts"
     ]
 }

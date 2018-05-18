@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "../dist/",
+        "outDir": "../../dist/",
         "sourceMap": true,
         "noImplicitAny": false,
         "declaration": false,
@@ -9,6 +9,6 @@
         "moduleResolution": "node"
     },
     "files": [
-        "../src/server.ts"
+        "../../src/server.ts"
     ]
 }

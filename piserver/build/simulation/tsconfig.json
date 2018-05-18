@@ -1,14 +1,14 @@
 {
     "compilerOptions": {
-        "outFile": "../client/client.js",
+        "outDir": "../../sim/",
         "sourceMap": true,
         "noImplicitAny": false,
         "declaration": false,
-        "module": "system",
-        "target": "es6",
+        "module": "commonjs",
+        "target": "es5",
         "moduleResolution": "node"
     },
     "files": [
-        "../src/client.ts"
+        "../../src/simulation.ts"
     ]
 }
