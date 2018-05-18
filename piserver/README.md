@@ -68,8 +68,6 @@ And then open up "virtual.html". You can draw lines by clicking on the box. The 
 
 Check that direction of bottom area of circle is as required
 
-Permanent storage of learnt sequences?
-
 ## Further information
 
 Please see ./src/zCODING_GUIDE.md and ./src/hats/*/README.md for further information.
