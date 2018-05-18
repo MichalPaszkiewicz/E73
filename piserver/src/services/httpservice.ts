@@ -3,11 +3,18 @@ import * as fs from "fs";
 import { IAmAUserInterface } from '../framework/interfaces/iamauserinterface';
 import { IAmACommand } from '../framework/interfaces/iamacommand';
 import { IAmARobotEvent } from '../framework/interfaces/iamarobotevent';
+import { FileMimeCollection, FileMime } from '../objects/filemimecollection';
 
 export class HttpService implements IAmAUserInterface{
 
     private _onCommanded: (command: IAmACommand) => void;
     unFetchedEvents: IAmARobotEvent[] = [];
+    fileMimes: FileMimeCollection = new FileMimeCollection([
+        new FileMime(".js", "application/javascript"),
+        new FileMime(".ts", "application/typescript"),
+        new FileMime(".html", "text/html"),
+        new FileMime(".css", "text/css")
+    ]);
 
     constructor(port: number){
         var self = this;
@@ -15,17 +22,20 @@ export class HttpService implements IAmAUserInterface{
             var requestData = "";
             request.on("data", (chunk) => { requestData += chunk.toString() })
             request.on("end", () => {
-                if(request.url.indexOf(".js") > 0 || request.url.indexOf(".ts") > 0){
-                    var content = fs.readFileSync("." + request.url, "utf-8");
-                    response.writeHead(200, 'OK', { 'Content-Type': 'text/javascript' });
-                    response.end(content, 'utf-8');
-                    return;
-                }
-                if(request.url.indexOf(".html") > 0){
-                    var content = fs.readFileSync("." + request.url, "utf-8");
-                    response.writeHead(200, 'OK', { 'Content-Type': 'text/html' });
-                    response.end(content, 'utf-8');
-                    return;
+                if(self.fileMimes.isARegisteredFileType(request.url)){
+                    var mimeType = self.fileMimes.getFileMime(request.url).mimeType;
+                    var path = "." + request.url;
+                    if(fs.existsSync(path)){
+                        var content = fs.readFileSync(path, "utf-8");
+                        response.writeHead(200, 'OK', {'Content-Type': mimeType});
+                        response.end(content, 'utf-8');
+                        return;
+                    }
+                    else{
+                        response.writeHead(404, 'File not found', {'Content-Type': 'text/html'});
+                        response.end();
+                        return;
+                    }
                 }
                 if(request.url.indexOf("events") > 0){
                     var content = JSON.stringify(self.unFetchedEvents);
