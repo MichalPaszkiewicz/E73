@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outFile": "../client/client.js",
+        "outFile": "../../client/client.js",
         "sourceMap": true,
         "noImplicitAny": false,
         "declaration": false,
