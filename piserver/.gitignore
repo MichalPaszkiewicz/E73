@@ -40,3 +40,4 @@ jspm_packages
 sim
 dist
 client
+!build/client
