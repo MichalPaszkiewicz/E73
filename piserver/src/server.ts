@@ -12,6 +12,7 @@ import { DefaultControlModule } from "./framework/services/defaultcontrolmodule"
 import { MotorEventHandler } from "./hats/motozero/motoreventhandler";
 import { TwoWheelDriveCommandHandler } from "./commandhandlers/twowheeldrivecommandhandler";
 import { LearningService } from "./services/learningservice";
+import { LogEventHandler } from "./eventhandlers/logeventhandler";
 
 //need to define motors with "leftMotor" and "rightMotor" ids for TwoWheelDrive
 
@@ -25,6 +26,10 @@ var motorEventHandler = new MotorEventHandler([motor1, motor2]);
 var domainService = new DefaultDomainService();
 var controlModule = new DefaultControlModule(domainService);
 controlModule.registerRobotEventHandler(motorEventHandler);
+
+var logEventHandler = new LogEventHandler();
+controlModule.registerRobotEventHandler(logEventHandler);
+
 controlModule.registerCommandHandler(new TwoWheelDriveCommandHandler());
 
 var learningService = new LearningService();

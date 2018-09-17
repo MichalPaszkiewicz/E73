@@ -3,7 +3,7 @@ export class FileMime{
 
     }
     matchesExtension(test: string){
-        return this.extension.replace(/./g, "").toLowerCase() == test.replace(/./g, "").toLowerCase();
+        return this.extension.replace(".", "").replace("/","").toLowerCase() == test.replace(".", "").replace("/","").toLowerCase();
     }
 }
 
