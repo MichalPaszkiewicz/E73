@@ -1,7 +1,6 @@
 import { SetFullStateCommand } from "../commands/setfullstatecommand";
 
-export var toPolarCoordinates = (x, y) => {
-        var sideLength = 400;
+export var toPolarCoordinates = (x, y, sideLength) => {
         var middlePoint = {x: sideLength/2, y: sideLength/2};
 
         var r = Math.sqrt(Math.pow(x - middlePoint.x,2) + Math.pow(y - middlePoint.y,2));
@@ -23,9 +22,9 @@ class PolarSpeedAdjustment{
         }
 }
 
-export var getCommand: (x, y) => SetFullStateCommand = (x, y) => {
+export var getCommand: (x, y, sideLength) => SetFullStateCommand = (x, y, sideLength) => {
 
-    var polarCoordinates = toPolarCoordinates(x, y);
+    var polarCoordinates = toPolarCoordinates(x, y, sideLength);
 
     var speed = Math.min(1, Math.max(0, polarCoordinates.r - 50) / 100);
     

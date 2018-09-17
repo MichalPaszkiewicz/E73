@@ -7,6 +7,7 @@ import {TouchService} from "./services/touchservice";
 import { StartLearningCommand } from "./commands/startlearningcommand";
 import { EndLearningCommand } from "./commands/endlearningcommand";
 import { RunLearntSequenceCommand } from "./commands/runlearntsequencecommand";
+import { Settings } from "./settings";
 
 document.getElementById("trimleft").onclick = e => ctrlModule.handle(new TrimLeftCommand());	
 document.getElementById("trimright").onclick = e => ctrlModule.handle(new TrimRightCommand());
@@ -14,6 +15,7 @@ document.getElementById("trimright").onclick = e => ctrlModule.handle(new TrimRi
 canvas.onclick = (e) => ctrlModule.handle(new ClickCircleCommand(e.offsetX, e.offsetY));
 var touchService = new TouchService(canvas);
 touchService.registerOnTouchDownEvent((e) => ctrlModule.handle(new ClickCircleCommand(e.offsetX, e.offsetY)));
+touchService.registerOnTouchOffEvent((e) => ctrlModule.handle(new ClickCircleCommand(Settings.sideLength / 2, Settings.sideLength / 2)));
 
 document.getElementById("record").onclick = e => {
     var name = window.prompt("Please type the name of the new sequence");

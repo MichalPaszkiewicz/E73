@@ -13,6 +13,7 @@ import { getCommand } from "../helpers/trig";
 import { START_LEARNING_COMMAND_NAME } from "../commands/startlearningcommand";
 import { END_LEARNING_COMMAND_NAME } from "../commands/endlearningcommand";
 import { RUN_LEARNT_SEQUENCE_COMMAND_NAME } from "../commands/runlearntsequencecommand";
+import { Settings } from "../settings";
 
 export class FrontEndCommandHandler implements IAmACommandHandler {
     handles: string[] = [
@@ -39,7 +40,7 @@ export class FrontEndCommandHandler implements IAmACommandHandler {
                 var clickCircle = <ClickCircleCommand>command;
                 drawCircleControl(this._ctx);
                 drawClickPoint(this._ctx, clickCircle.x, clickCircle.y); 
-                postRequest(this._serverUrl, "/command", getCommand(clickCircle.x, clickCircle.y));
+                postRequest(this._serverUrl, "/command", getCommand(clickCircle.x, clickCircle.y, Settings.sideLength));
                 break;
             default:
                 postRequest(this._serverUrl, "/command", command);        

@@ -12,6 +12,7 @@ export class TouchService{
     private _element: HTMLElement;
     private _ongoingTouches: TouchCopy[] = [];
     private _onTouchDownEvents: ((e: TouchCopy) => void)[] = [];
+    private _onTouchOffEvents: ((e: TouchCopy) => void)[] = [];
 
     constructor(element: HTMLElement){
         this._element = element;
@@ -41,7 +42,9 @@ export class TouchService{
         var touches = e.changedTouches;
 
         for (var i = 0; i < touches.length; i++) {
+            var touchCopy = copyTouch(touches[i], this._element);
             var index = this._getTouchIndex(touches[i].identifier);
+            this._onTouchOffEvents.forEach(toe => toe(touchCopy));
             this._ongoingTouches.splice(index, 1);
         }
     }
@@ -51,7 +54,9 @@ export class TouchService{
         var touches = e.changedTouches;
         
         for (var i = 0; i < touches.length; i++) {
+            var touchCopy = copyTouch(touches[i], this._element);
             var index = this._getTouchIndex(touches[i].identifier);
+            this._onTouchOffEvents.forEach(toe => toe(touchCopy));
             this._ongoingTouches.splice(index, 1);
         }
     }
@@ -70,5 +75,9 @@ export class TouchService{
 
     registerOnTouchDownEvent(callback: (e: TouchCopy) => void){
         this._onTouchDownEvents.push(callback);
+    }
+
+    registerOnTouchOffEvent(callback: (e: TouchCopy) => void){
+        this._onTouchOffEvents.push(callback);
     }
 }

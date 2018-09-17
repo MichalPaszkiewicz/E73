@@ -5,7 +5,6 @@ declare var process: any;
 const port = 3000;
 
 import {fakeMotorFactory} from "./hats/motozero/fakemotorfactory";
-import {TwoWheelDrive} from "./aggregateroots/twowheeldrive";
 import {Robot} from "./objects/robot";
 import {HttpService} from "./services/httpservice";
 import { DefaultControlModule } from "./framework/services/defaultcontrolmodule";
@@ -29,6 +28,9 @@ var controlModule = new DefaultControlModule(domainService);
 
 controlModule.registerRobotEventHandler(motorEventHandler);
 controlModule.registerCommandHandler(new TwoWheelDriveCommandHandler());
+
+var logEventHandler = new LogEventHandler();
+controlModule.registerRobotEventHandler(logEventHandler);
 
 var learningService = new LearningService();
 learningService.attachToControlModule(controlModule);

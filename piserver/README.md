@@ -65,11 +65,7 @@ And then open up "virtual.html". You can draw lines by clicking on the box. The 
 
 Check that direction of bottom area of circle is as required
 
-Update Readme
-
 Create switch between line sensor/control mode
-
-On release of finger on circle control, default to off/middle.
 
 Shutdown/restart option on controller
 
