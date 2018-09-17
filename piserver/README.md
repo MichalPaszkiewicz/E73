@@ -73,10 +73,6 @@ And once simulation/server is started up, you should be able to navigate to /pow
 
 Check that direction of bottom area of circle is as required
 
-Create switch between line sensor/control mode
-
-Shutdown/restart option on controller
-
 ## Further information
 
 Please see ./src/zCODING_GUIDE.md and ./src/hats/*/README.md for further information.

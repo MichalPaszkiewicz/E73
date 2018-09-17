@@ -14,6 +14,7 @@ import { TouchService } from "./services/touchservice";
 import {VirtualRobot} from "./drawings/virtualrobot";
 import { MyLine } from "./drawings/myline";
 import { Keyboard } from "./userinterfaces/keyboard";
+import { TurnOnAutomaticControlCommand } from "./commands/turnonautomaticcontrolcommand";
 
 var domainService = new DefaultDomainService();
 var controlModule = new DefaultControlModule(domainService);
@@ -52,6 +53,10 @@ var myLine = new MyLine(20);
 
 canvas.onclick = (e) => {
     myLine.addPoint(new Vector2d(e.offsetX, e.offsetY));
+}
+
+document.getElementById("automaticmode").onclick = (e) => {
+	controlModule.handle(new TurnOnAutomaticControlCommand());
 }
 
 var touchService = new TouchService(canvas);

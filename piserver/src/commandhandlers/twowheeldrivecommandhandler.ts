@@ -7,21 +7,22 @@ import { TRIM_RIGHT_COMMAND_NAME, TrimRightCommand } from "../commands/trimright
 import { TwoWheelDrive } from "../aggregateroots/twowheeldrive";
 import { IAmARobotEvent } from "../framework/interfaces/iamarobotevent";
 import { SET_FULL_STATE_COMMAND_NAME, SetFullStateCommand } from "../commands/setfullstatecommand";
+import { TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME, TurnOnAutomaticControlCommand } from "../commands/turnonautomaticcontrolcommand";
 
 export class TwoWheelDriveCommandHandler implements IAmACommandHandler {
     handles: string[] = [
         SET_FULL_STATE_COMMAND_NAME,
         DIRECTION_KEY_COMMAND_NAME,
         TRIM_LEFT_COMMAND_NAME,
-        TRIM_RIGHT_COMMAND_NAME
+        TRIM_RIGHT_COMMAND_NAME,
+        TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME
     ]
-
-
 
     handle(command: SetFullStateCommand |
             DirectionKeyCommand |
             TrimLeftCommand |
-            TrimRightCommand, domainService: IAmADomainService): IAmARobotEvent[] {
+            TrimRightCommand |
+            TurnOnAutomaticControlCommand, domainService: IAmADomainService): IAmARobotEvent[] {
         var self = this;
         var robotEvents = [];
         domainService.getAggregateRoot(TwoWheelDrive, (ar) => {

@@ -1,8 +1,8 @@
 import { IAmARobotEventHandler } from "../framework/interfaces/iamaroboteventhandler";
 import { IAmARobotEvent } from "../framework/interfaces/iamarobotevent";
-import { POWERED_OFF_EVENT_NAME } from "../../sim/events/poweredoffevent";
-import { RESTARTED_EVENT_NAME } from "../../sim/events/restartedevent";
 import {exec} from "child_process";
+import { POWERED_OFF_EVENT_NAME } from "../events/poweredoffevent";
+import { RESTARTED_EVENT_NAME } from "../events/restartedevent";
 
 export class PowerEventHandler implements IAmARobotEventHandler{
     handles = [

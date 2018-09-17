@@ -999,10 +999,27 @@ System.register("aggregateroots/entities/linemeasurearraymemory", ["aggregateroo
         }
     };
 });
-System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutation", "commands/trimleftcommand", "commands/trimrightcommand", "commands/directionkeycommand", "hats/motozero/events/motorspeedsetevent", "hats/motozero/events/motorturnedoffevent", "commands/setfullstatecommand", "framework/events/turnedoffevent", "hats/linesensor/sensations/linefoundsensation", "hats/linesensor/sensations/linelostsensation", "aggregateroots/directionkeytofunc", "aggregateroots/entities/linemeasurearraymemory"], function (exports_43, context_43) {
+System.register("commands/turnonautomaticcontrolcommand", [], function (exports_43, context_43) {
     "use strict";
     var __moduleName = context_43 && context_43.id;
-    var controlpermutation_1, trimleftcommand_1, trimrightcommand_1, directionkeycommand_1, motorspeedsetevent_1, motorturnedoffevent_1, setfullstatecommand_1, turnedoffevent_1, linefoundsensation_2, linelostsensation_2, directionkeytofunc_1, linemeasurearraymemory_1, TwoWheelDrive;
+    var TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME, TurnOnAutomaticControlCommand;
+    return {
+        setters: [],
+        execute: function () {
+            exports_43("TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME", TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME = "TurnOnAutomaticControl");
+            TurnOnAutomaticControlCommand = class TurnOnAutomaticControlCommand {
+                constructor() {
+                    this.name = TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME;
+                }
+            };
+            exports_43("TurnOnAutomaticControlCommand", TurnOnAutomaticControlCommand);
+        }
+    };
+});
+System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutation", "commands/trimleftcommand", "commands/trimrightcommand", "commands/directionkeycommand", "hats/motozero/events/motorspeedsetevent", "hats/motozero/events/motorturnedoffevent", "commands/setfullstatecommand", "framework/events/turnedoffevent", "hats/linesensor/sensations/linefoundsensation", "hats/linesensor/sensations/linelostsensation", "aggregateroots/directionkeytofunc", "aggregateroots/entities/linemeasurearraymemory", "commands/turnonautomaticcontrolcommand"], function (exports_44, context_44) {
+    "use strict";
+    var __moduleName = context_44 && context_44.id;
+    var controlpermutation_1, trimleftcommand_1, trimrightcommand_1, directionkeycommand_1, motorspeedsetevent_1, motorturnedoffevent_1, setfullstatecommand_1, turnedoffevent_1, linefoundsensation_2, linelostsensation_2, directionkeytofunc_1, linemeasurearraymemory_1, turnonautomaticcontrolcommand_1, TwoWheelDrive;
     return {
         setters: [
             function (controlpermutation_1_1) {
@@ -1040,11 +1057,15 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
             },
             function (linemeasurearraymemory_1_1) {
                 linemeasurearraymemory_1 = linemeasurearraymemory_1_1;
+            },
+            function (turnonautomaticcontrolcommand_1_1) {
+                turnonautomaticcontrolcommand_1 = turnonautomaticcontrolcommand_1_1;
             }
         ],
         execute: function () {
             TwoWheelDrive = class TwoWheelDrive {
                 constructor() {
+                    this.automaticControlMode = false;
                     this.founds = 0;
                     this.losts = 0;
                     this.leftMotorId = "leftMotor";
@@ -1067,6 +1088,7 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                 }
                 handle(command) {
                     var self = this;
+                    self.automaticControlMode = false;
                     switch (command.name) {
                         case trimleftcommand_1.TRIM_LEFT_COMMAND_NAME:
                             self.trimLeft();
@@ -1091,6 +1113,8 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                         case setfullstatecommand_1.SET_FULL_STATE_COMMAND_NAME:
                             var setFullState = command;
                             self.setFullState(setFullState.forwardOn, setFullState.backwardOn, setFullState.leftOn, setFullState.rightOn, setFullState.speed, setFullState.speedDifference);
+                        case turnonautomaticcontrolcommand_1.TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME:
+                            self.automaticControlMode = true;
                             break;
                     }
                     var robotEvents = self.unprocessedEvents;
@@ -1101,6 +1125,9 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     var self = this;
                     if (!this._lineMeasures) {
                         this._lineMeasures = new linemeasurearraymemory_1.LineMeasureArrayMemory(sensation.totalLineSensors, 5);
+                    }
+                    if (!self.automaticControlMode) {
+                        return;
                     }
                     switch (sensation.name) {
                         case linefoundsensation_2.LINE_FOUND_SENSATION_NAME:
@@ -1315,13 +1342,13 @@ System.register("aggregateroots/twowheeldrive", ["aggregateroots/controlpermutat
                     this._updateMotors();
                 }
             };
-            exports_43("TwoWheelDrive", TwoWheelDrive);
+            exports_44("TwoWheelDrive", TwoWheelDrive);
         }
     };
 });
-System.register("sensationhandlers/linesensationhandler", ["hats/linesensor/sensations/linefoundsensation", "hats/linesensor/sensations/linelostsensation", "aggregateroots/twowheeldrive"], function (exports_44, context_44) {
+System.register("sensationhandlers/linesensationhandler", ["hats/linesensor/sensations/linefoundsensation", "hats/linesensor/sensations/linelostsensation", "aggregateroots/twowheeldrive"], function (exports_45, context_45) {
     "use strict";
-    var __moduleName = context_44 && context_44.id;
+    var __moduleName = context_45 && context_45.id;
     var linefoundsensation_3, linelostsensation_3, twowheeldrive_1, LineSensationHandler;
     return {
         setters: [
@@ -1358,13 +1385,13 @@ System.register("sensationhandlers/linesensationhandler", ["hats/linesensor/sens
                     return robotEvents;
                 }
             };
-            exports_44("LineSensationHandler", LineSensationHandler);
+            exports_45("LineSensationHandler", LineSensationHandler);
         }
     };
 });
-System.register("hats/motozero/motor", ["framework/enums/pinstate"], function (exports_45, context_45) {
+System.register("hats/motozero/motor", ["framework/enums/pinstate"], function (exports_46, context_46) {
     "use strict";
-    var __moduleName = context_45 && context_45.id;
+    var __moduleName = context_46 && context_46.id;
     var pinstate_2, Motor;
     return {
         setters: [
@@ -1426,13 +1453,13 @@ System.register("hats/motozero/motor", ["framework/enums/pinstate"], function (e
                     this._speed = newSpeed;
                 }
             };
-            exports_45("Motor", Motor);
+            exports_46("Motor", Motor);
         }
     };
 });
-System.register("hats/motozero/motoreventhandler", ["hats/motozero/events/motorturnedoffevent", "hats/motozero/events/motorspeedsetevent", "framework/events/turnedoffevent"], function (exports_46, context_46) {
+System.register("hats/motozero/motoreventhandler", ["hats/motozero/events/motorturnedoffevent", "hats/motozero/events/motorspeedsetevent", "framework/events/turnedoffevent"], function (exports_47, context_47) {
     "use strict";
-    var __moduleName = context_46 && context_46.id;
+    var __moduleName = context_47 && context_47.id;
     var motorturnedoffevent_2, motorspeedsetevent_2, turnedoffevent_2, MotorEventHandler;
     return {
         setters: [
@@ -1479,22 +1506,22 @@ System.register("hats/motozero/motoreventhandler", ["hats/motozero/events/motort
                     }
                 }
             };
-            exports_46("MotorEventHandler", MotorEventHandler);
+            exports_47("MotorEventHandler", MotorEventHandler);
         }
     };
 });
-System.register("hats/motozero/interfaces/iamamotorfactory", [], function (exports_47, context_47) {
+System.register("hats/motozero/interfaces/iamamotorfactory", [], function (exports_48, context_48) {
     "use strict";
-    var __moduleName = context_47 && context_47.id;
+    var __moduleName = context_48 && context_48.id;
     return {
         setters: [],
         execute: function () {
         }
     };
 });
-System.register("hats/motozero/fakemotorfactory", ["hats/motozero/motor", "services/fakepinfactory"], function (exports_48, context_48) {
+System.register("hats/motozero/fakemotorfactory", ["hats/motozero/motor", "services/fakepinfactory"], function (exports_49, context_49) {
     "use strict";
-    var __moduleName = context_48 && context_48.id;
+    var __moduleName = context_49 && context_49.id;
     var motor_1, fakepinfactory_1, fakeMotorFactory;
     return {
         setters: [
@@ -1506,14 +1533,14 @@ System.register("hats/motozero/fakemotorfactory", ["hats/motozero/motor", "servi
             }
         ],
         execute: function () {
-            exports_48("fakeMotorFactory", fakeMotorFactory = (motorId, enablePin, forwardPin, backwardPin) => new motor_1.Motor(motorId, enablePin, forwardPin, backwardPin, fakepinfactory_1.fakePinFactory));
+            exports_49("fakeMotorFactory", fakeMotorFactory = (motorId, enablePin, forwardPin, backwardPin) => new motor_1.Motor(motorId, enablePin, forwardPin, backwardPin, fakepinfactory_1.fakePinFactory));
         }
     };
 });
-System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/directionkeycommand", "commands/trimleftcommand", "commands/trimrightcommand", "aggregateroots/twowheeldrive", "commands/setfullstatecommand"], function (exports_49, context_49) {
+System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/directionkeycommand", "commands/trimleftcommand", "commands/trimrightcommand", "aggregateroots/twowheeldrive", "commands/setfullstatecommand", "commands/turnonautomaticcontrolcommand"], function (exports_50, context_50) {
     "use strict";
-    var __moduleName = context_49 && context_49.id;
-    var directionkeycommand_2, trimleftcommand_2, trimrightcommand_2, twowheeldrive_2, setfullstatecommand_2, TwoWheelDriveCommandHandler;
+    var __moduleName = context_50 && context_50.id;
+    var directionkeycommand_2, trimleftcommand_2, trimrightcommand_2, twowheeldrive_2, setfullstatecommand_2, turnonautomaticcontrolcommand_2, TwoWheelDriveCommandHandler;
     return {
         setters: [
             function (directionkeycommand_2_1) {
@@ -1530,6 +1557,9 @@ System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/direct
             },
             function (setfullstatecommand_2_1) {
                 setfullstatecommand_2 = setfullstatecommand_2_1;
+            },
+            function (turnonautomaticcontrolcommand_2_1) {
+                turnonautomaticcontrolcommand_2 = turnonautomaticcontrolcommand_2_1;
             }
         ],
         execute: function () {
@@ -1539,7 +1569,8 @@ System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/direct
                         setfullstatecommand_2.SET_FULL_STATE_COMMAND_NAME,
                         directionkeycommand_2.DIRECTION_KEY_COMMAND_NAME,
                         trimleftcommand_2.TRIM_LEFT_COMMAND_NAME,
-                        trimrightcommand_2.TRIM_RIGHT_COMMAND_NAME
+                        trimrightcommand_2.TRIM_RIGHT_COMMAND_NAME,
+                        turnonautomaticcontrolcommand_2.TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME
                     ];
                 }
                 handle(command, domainService) {
@@ -1551,13 +1582,13 @@ System.register("commandhandlers/twowheeldrivecommandhandler", ["commands/direct
                     return robotEvents;
                 }
             };
-            exports_49("TwoWheelDriveCommandHandler", TwoWheelDriveCommandHandler);
+            exports_50("TwoWheelDriveCommandHandler", TwoWheelDriveCommandHandler);
         }
     };
 });
-System.register("objects/learnableevent", [], function (exports_50, context_50) {
+System.register("objects/learnableevent", [], function (exports_51, context_51) {
     "use strict";
-    var __moduleName = context_50 && context_50.id;
+    var __moduleName = context_51 && context_51.id;
     var LearnableEvent;
     return {
         setters: [],
@@ -1568,13 +1599,13 @@ System.register("objects/learnableevent", [], function (exports_50, context_50) 
                     this.waitTime = waitTime;
                 }
             };
-            exports_50("LearnableEvent", LearnableEvent);
+            exports_51("LearnableEvent", LearnableEvent);
         }
     };
 });
-System.register("objects/learnablesequence", [], function (exports_51, context_51) {
+System.register("objects/learnablesequence", [], function (exports_52, context_52) {
     "use strict";
-    var __moduleName = context_51 && context_51.id;
+    var __moduleName = context_52 && context_52.id;
     var LearnableSequence;
     return {
         setters: [],
@@ -1585,66 +1616,66 @@ System.register("objects/learnablesequence", [], function (exports_51, context_5
                     this.events = events;
                 }
             };
-            exports_51("LearnableSequence", LearnableSequence);
+            exports_52("LearnableSequence", LearnableSequence);
         }
     };
 });
-System.register("commands/startlearningcommand", [], function (exports_52, context_52) {
+System.register("commands/startlearningcommand", [], function (exports_53, context_53) {
     "use strict";
-    var __moduleName = context_52 && context_52.id;
+    var __moduleName = context_53 && context_53.id;
     var START_LEARNING_COMMAND_NAME, StartLearningCommand;
     return {
         setters: [],
         execute: function () {
-            exports_52("START_LEARNING_COMMAND_NAME", START_LEARNING_COMMAND_NAME = "StartLearning");
+            exports_53("START_LEARNING_COMMAND_NAME", START_LEARNING_COMMAND_NAME = "StartLearning");
             StartLearningCommand = class StartLearningCommand {
                 constructor(sequenceName) {
                     this.sequenceName = sequenceName;
                     this.name = START_LEARNING_COMMAND_NAME;
                 }
             };
-            exports_52("StartLearningCommand", StartLearningCommand);
+            exports_53("StartLearningCommand", StartLearningCommand);
         }
     };
 });
-System.register("commands/endlearningcommand", [], function (exports_53, context_53) {
+System.register("commands/endlearningcommand", [], function (exports_54, context_54) {
     "use strict";
-    var __moduleName = context_53 && context_53.id;
+    var __moduleName = context_54 && context_54.id;
     var END_LEARNING_COMMAND_NAME, EndLearningCommand;
     return {
         setters: [],
         execute: function () {
-            exports_53("END_LEARNING_COMMAND_NAME", END_LEARNING_COMMAND_NAME = "EndLearning");
+            exports_54("END_LEARNING_COMMAND_NAME", END_LEARNING_COMMAND_NAME = "EndLearning");
             EndLearningCommand = class EndLearningCommand {
                 constructor() {
                     this.name = END_LEARNING_COMMAND_NAME;
                 }
             };
-            exports_53("EndLearningCommand", EndLearningCommand);
+            exports_54("EndLearningCommand", EndLearningCommand);
         }
     };
 });
-System.register("commands/runlearntsequencecommand", [], function (exports_54, context_54) {
+System.register("commands/runlearntsequencecommand", [], function (exports_55, context_55) {
     "use strict";
-    var __moduleName = context_54 && context_54.id;
+    var __moduleName = context_55 && context_55.id;
     var RUN_LEARNT_SEQUENCE_COMMAND_NAME, RunLearntSequenceCommand;
     return {
         setters: [],
         execute: function () {
-            exports_54("RUN_LEARNT_SEQUENCE_COMMAND_NAME", RUN_LEARNT_SEQUENCE_COMMAND_NAME = "RunLearntSequence");
+            exports_55("RUN_LEARNT_SEQUENCE_COMMAND_NAME", RUN_LEARNT_SEQUENCE_COMMAND_NAME = "RunLearntSequence");
             RunLearntSequenceCommand = class RunLearntSequenceCommand {
                 constructor(sequenceName) {
                     this.sequenceName = sequenceName;
                     this.name = RUN_LEARNT_SEQUENCE_COMMAND_NAME;
                 }
             };
-            exports_54("RunLearntSequenceCommand", RunLearntSequenceCommand);
+            exports_55("RunLearntSequenceCommand", RunLearntSequenceCommand);
         }
     };
 });
-System.register("services/learningservice", ["objects/learnableevent", "objects/learnablesequence", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand"], function (exports_55, context_55) {
+System.register("services/learningservice", ["objects/learnableevent", "objects/learnablesequence", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand"], function (exports_56, context_56) {
     "use strict";
-    var __moduleName = context_55 && context_55.id;
+    var __moduleName = context_56 && context_56.id;
     var learnableevent_1, learnablesequence_1, startlearningcommand_1, endlearningcommand_1, runlearntsequencecommand_1, LearningServiceCommandHandler, LearningServiceEventHandler, LearningService;
     return {
         setters: [
@@ -1811,13 +1842,13 @@ System.register("services/learningservice", ["objects/learnableevent", "objects/
                     this._running = false;
                 }
             };
-            exports_55("LearningService", LearningService);
+            exports_56("LearningService", LearningService);
         }
     };
 });
-System.register("services/touchservice", [], function (exports_56, context_56) {
+System.register("services/touchservice", [], function (exports_57, context_57) {
     "use strict";
-    var __moduleName = context_56 && context_56.id;
+    var __moduleName = context_57 && context_57.id;
     function copyTouch(touch, targetElement) {
         var target = targetElement.getBoundingClientRect();
         return new TouchCopy(touch.identifier, touch.pageX - target.left, touch.pageY - target.top);
@@ -1837,6 +1868,7 @@ System.register("services/touchservice", [], function (exports_56, context_56) {
                 constructor(element) {
                     this._ongoingTouches = [];
                     this._onTouchDownEvents = [];
+                    this._onTouchOffEvents = [];
                     this._element = element;
                     this._element.addEventListener("touchstart", (e) => this._handleStart(e), false);
                     this._element.addEventListener("touchend", (e) => this._handleEnd(e), false);
@@ -1859,7 +1891,9 @@ System.register("services/touchservice", [], function (exports_56, context_56) {
                     e.preventDefault();
                     var touches = e.changedTouches;
                     for (var i = 0; i < touches.length; i++) {
+                        var touchCopy = copyTouch(touches[i], this._element);
                         var index = this._getTouchIndex(touches[i].identifier);
+                        this._onTouchOffEvents.forEach(toe => toe(touchCopy));
                         this._ongoingTouches.splice(index, 1);
                     }
                 }
@@ -1867,7 +1901,9 @@ System.register("services/touchservice", [], function (exports_56, context_56) {
                     e.preventDefault();
                     var touches = e.changedTouches;
                     for (var i = 0; i < touches.length; i++) {
+                        var touchCopy = copyTouch(touches[i], this._element);
                         var index = this._getTouchIndex(touches[i].identifier);
+                        this._onTouchOffEvents.forEach(toe => toe(touchCopy));
                         this._ongoingTouches.splice(index, 1);
                     }
                 }
@@ -1884,28 +1920,31 @@ System.register("services/touchservice", [], function (exports_56, context_56) {
                 registerOnTouchDownEvent(callback) {
                     this._onTouchDownEvents.push(callback);
                 }
+                registerOnTouchOffEvent(callback) {
+                    this._onTouchOffEvents.push(callback);
+                }
             };
-            exports_56("TouchService", TouchService);
+            exports_57("TouchService", TouchService);
         }
     };
 });
-System.register("helpers/canvas", [], function (exports_57, context_57) {
+System.register("helpers/canvas", [], function (exports_58, context_58) {
     "use strict";
-    var __moduleName = context_57 && context_57.id;
+    var __moduleName = context_58 && context_58.id;
     var checkPositionColour;
     return {
         setters: [],
         execute: function () {
-            exports_57("checkPositionColour", checkPositionColour = (context, v) => {
+            exports_58("checkPositionColour", checkPositionColour = (context, v) => {
                 var imgData = context.getImageData(v.x, v.y, 1, 1).data;
                 return imgData[0] > 200 && imgData[1] == 0 && imgData[2] == 0;
             });
         }
     };
 });
-System.register("drawings/virtualrobot", ["helpers/vector", "helpers/canvas", "commands/setfullstatecommand"], function (exports_58, context_58) {
+System.register("drawings/virtualrobot", ["helpers/vector", "helpers/canvas", "commands/setfullstatecommand"], function (exports_59, context_59) {
     "use strict";
-    var __moduleName = context_58 && context_58.id;
+    var __moduleName = context_59 && context_59.id;
     var vector_2, canvas_1, setfullstatecommand_3, VirtualRobot;
     return {
         setters: [
@@ -1982,13 +2021,13 @@ System.register("drawings/virtualrobot", ["helpers/vector", "helpers/canvas", "c
                     self.position = self.position.add(averageVelocity);
                 }
             };
-            exports_58("VirtualRobot", VirtualRobot);
+            exports_59("VirtualRobot", VirtualRobot);
         }
     };
 });
-System.register("drawings/myline", [], function (exports_59, context_59) {
+System.register("drawings/myline", [], function (exports_60, context_60) {
     "use strict";
-    var __moduleName = context_59 && context_59.id;
+    var __moduleName = context_60 && context_60.id;
     var MyLine;
     return {
         setters: [],
@@ -2019,13 +2058,13 @@ System.register("drawings/myline", [], function (exports_59, context_59) {
                     context.lineWidth = 1;
                 }
             };
-            exports_59("MyLine", MyLine);
+            exports_60("MyLine", MyLine);
         }
     };
 });
-System.register("userinterfaces/keyboard", ["commands/directionkeycommand", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand"], function (exports_60, context_60) {
+System.register("userinterfaces/keyboard", ["commands/directionkeycommand", "commands/startlearningcommand", "commands/endlearningcommand", "commands/runlearntsequencecommand"], function (exports_61, context_61) {
     "use strict";
-    var __moduleName = context_60 && context_60.id;
+    var __moduleName = context_61 && context_61.id;
     var directionkeycommand_3, startlearningcommand_2, endlearningcommand_2, runlearntsequencecommand_2, Keyboard;
     return {
         setters: [
@@ -2090,14 +2129,14 @@ System.register("userinterfaces/keyboard", ["commands/directionkeycommand", "com
                 applyEvent(event) {
                 }
             };
-            exports_60("Keyboard", Keyboard);
+            exports_61("Keyboard", Keyboard);
         }
     };
 });
-System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "hats/linesensor/linesensor", "hats/linesensor/linesensorarray", "framework/services/defaultcontrolmodule", "framework/services/defaultdomainservice", "sensationhandlers/linesensationhandler", "hats/motozero/motoreventhandler", "hats/motozero/fakemotorfactory", "commandhandlers/twowheeldrivecommandhandler", "services/learningservice", "helpers/vector", "services/touchservice", "drawings/virtualrobot", "drawings/myline", "userinterfaces/keyboard"], function (exports_61, context_61) {
+System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "hats/linesensor/linesensor", "hats/linesensor/linesensorarray", "framework/services/defaultcontrolmodule", "framework/services/defaultdomainservice", "sensationhandlers/linesensationhandler", "hats/motozero/motoreventhandler", "hats/motozero/fakemotorfactory", "commandhandlers/twowheeldrivecommandhandler", "services/learningservice", "helpers/vector", "services/touchservice", "drawings/virtualrobot", "drawings/myline", "userinterfaces/keyboard", "commands/turnonautomaticcontrolcommand"], function (exports_62, context_62) {
     "use strict";
-    var __moduleName = context_61 && context_61.id;
-    var robot_1, fakepinfactory_2, linesensor_1, linesensorarray_1, defaultcontrolmodule_1, defaultdomainservice_1, linesensationhandler_1, motoreventhandler_1, fakemotorfactory_1, twowheeldrivecommandhandler_1, learningservice_1, vector_3, touchservice_1, virtualrobot_1, myline_1, keyboard_1, domainService, controlModule, leftMotor, rightMotor, lineSensorArray, i, lineSensor, robot, learningService, canvas, ctx, myLine, touchService, virtualRobot, run;
+    var __moduleName = context_62 && context_62.id;
+    var robot_1, fakepinfactory_2, linesensor_1, linesensorarray_1, defaultcontrolmodule_1, defaultdomainservice_1, linesensationhandler_1, motoreventhandler_1, fakemotorfactory_1, twowheeldrivecommandhandler_1, learningservice_1, vector_3, touchservice_1, virtualrobot_1, myline_1, keyboard_1, turnonautomaticcontrolcommand_3, domainService, controlModule, leftMotor, rightMotor, lineSensorArray, i, lineSensor, robot, learningService, canvas, ctx, myLine, touchService, virtualRobot, run;
     return {
         setters: [
             function (robot_1_1) {
@@ -2147,6 +2186,9 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
             },
             function (keyboard_1_1) {
                 keyboard_1 = keyboard_1_1;
+            },
+            function (turnonautomaticcontrolcommand_3_1) {
+                turnonautomaticcontrolcommand_3 = turnonautomaticcontrolcommand_3_1;
             }
         ],
         execute: function () {
@@ -2178,6 +2220,9 @@ System.register("virtualrobot", ["objects/robot", "services/fakepinfactory", "ha
             myLine = new myline_1.MyLine(20);
             canvas.onclick = (e) => {
                 myLine.addPoint(new vector_3.Vector2d(e.offsetX, e.offsetY));
+            };
+            document.getElementById("automaticmode").onclick = (e) => {
+                controlModule.handle(new turnonautomaticcontrolcommand_3.TurnOnAutomaticControlCommand());
             };
             touchService = new touchservice_1.TouchService(canvas);
             touchService.registerOnTouchDownEvent((e) => myLine.addPoint(new vector_3.Vector2d(e.offsetX, e.offsetY)));

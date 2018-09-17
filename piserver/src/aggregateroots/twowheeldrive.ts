@@ -19,12 +19,16 @@ import { DirectionKeyToFunc } from "./directionkeytofunc";
 import { LineMeasureArray } from "./entities/linemeasurearray";
 import { LineMeasureArrayMemory } from "./entities/linemeasurearraymemory";
 import { Vector2d } from "../helpers/vector";
+import { TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME } from "../commands/turnonautomaticcontrolcommand";
 
 export class TwoWheelDrive implements IAmAnAggregateRoot{
+
+    automaticControlMode: boolean = false;
 
     id?: string;
     handle(command: IAmACommand): IAmARobotEvent[] {
         var self = this;
+        self.automaticControlMode = false;
         switch(command.name){
             case TRIM_LEFT_COMMAND_NAME:
                 self.trimLeft();
@@ -56,6 +60,8 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
                     setFullState.rightOn,
                     setFullState.speed,
                     setFullState.speedDifference);
+            case TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME:
+                self.automaticControlMode = true;
                 break;
         }
 
@@ -75,6 +81,10 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
 
         if(!this._lineMeasures){
             this._lineMeasures = new LineMeasureArrayMemory(sensation.totalLineSensors, 5);
+        }
+
+        if(!self.automaticControlMode){
+            return;
         }
 
         switch(sensation.name){

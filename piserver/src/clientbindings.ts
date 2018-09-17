@@ -5,6 +5,7 @@ import { LearningService } from "./services/learningservice";
 import { LocalStorageService } from "./services/localstorageservice";
 import { FrontEndCommandHandler } from "./commandhandlers/frontendcommandhandler";
 import { Keyboard } from "./userinterfaces/keyboard";
+import { TurnOnAutomaticControlCommand } from "./commands/turnonautomaticcontrolcommand";
 
 var controlModule = new DefaultControlModule(new DefaultDomainService());
 
@@ -29,6 +30,10 @@ learningService.sequences = sequences || [];
 learningService.registerOnSequenceAdded((s) => {
 	localStorageService.saveItem(LEARNING_STORE_STRING, learningService.sequences);
 });
+
+document.getElementById("automaticmode").onclick = (e) => {
+	controlModule.handle(new TurnOnAutomaticControlCommand());
+}
 
 export var learningModule = learningService;
 export var ctrlModule = controlModule;
