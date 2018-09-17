@@ -84,7 +84,7 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
         }
 
         if(!self.automaticControlMode){
-            return;
+            return [];
         }
 
         switch(sensation.name){
