@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "outFile": "../../client/power.js",
+        "sourceMap": true,
+        "noImplicitAny": false,
+        "declaration": false,
+        "module": "system",
+        "target": "es6",
+        "moduleResolution": "node"
+    },
+    "files": [
+        "../../src/power.ts"
+    ]
+}

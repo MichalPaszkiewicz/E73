@@ -61,6 +61,14 @@ run `tsc -p build/virtualrobot`
 
 And then open up "virtual.html". You can draw lines by clicking on the box. The robot will start moving when it first detects a line.
 
+# Power options
+
+If you want access to power options:
+
+run `tsc -p build/power`
+
+And once simulation/server is started up, you should be able to navigate to /power.html, from where you can have power control.
+
 ## todo
 
 Check that direction of bottom area of circle is as required

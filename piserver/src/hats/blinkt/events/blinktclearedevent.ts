@@ -1,4 +1,4 @@
-import { IAmARobotEvent } from "../../framework/interfaces/iamarobotevent";
+import { IAmARobotEvent } from "../../../framework/interfaces/iamarobotevent";
 
 export var BLINKT_CLEARED_EVENT_NAME = "BlinktClearedEvent";
 

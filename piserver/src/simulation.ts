@@ -13,6 +13,7 @@ import { MotorEventHandler } from "./hats/motozero/motoreventhandler";
 import { TwoWheelDriveCommandHandler } from "./commandhandlers/twowheeldrivecommandhandler";
 import { LogEventHandler } from "./eventhandlers/logeventhandler";
 import { LearningService } from "./services/learningservice";
+import { PowerCommandHandler } from "./commandhandlers/powercommandhandler";
 
 var motor1 = fakeMotorFactory("motor1", 5, 24, 27);
 var motor2 = fakeMotorFactory("motor2", 17, 6, 22);
@@ -34,6 +35,8 @@ controlModule.registerRobotEventHandler(logEventHandler);
 
 var learningService = new LearningService();
 learningService.attachToControlModule(controlModule);
+
+controlModule.registerCommandHandler(new PowerCommandHandler());
 
 var robot = new Robot(controlModule, [
 	httpService

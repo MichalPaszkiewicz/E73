@@ -1,4 +1,4 @@
-import { IAmARobotEvent } from "../../framework/interfaces/iamarobotevent";
+import { IAmARobotEvent } from "../../../framework/interfaces/iamarobotevent";
 
 export var BLINKT_ALL_PIXELS_SET_EVENT_NAME = "BlinktAllPixelsSet";
 

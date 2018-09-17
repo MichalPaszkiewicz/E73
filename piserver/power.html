@@ -1,0 +1,32 @@
+<html>
+	<head>
+			<meta name="viewport" content="400, initial-scale=1.0">
+	</head>
+	<body>
+		<div>
+				<button id="poweroff">Power Off</button>
+				<button id="restart">Restart</button>
+		</div>
+		<style>
+			button{
+				background: #ff3513;
+				padding: 10px;
+				width: 45%;
+				border: none;
+				font-family: arial;
+				font-size: 20px;
+				cursor: pointer;
+				margin-bottom: 10px;
+			}
+			.hidden{
+				display: none;
+			}
+		</style>
+		<div id="myconsole"></div>
+		<script src="./scripts/system.js"></script>
+		<script src="./client/power.js"></script>
+		<script>
+			System.import("power")
+		</script>
+	</body>
+</html>

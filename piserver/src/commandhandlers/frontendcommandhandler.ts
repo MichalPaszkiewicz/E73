@@ -49,3 +49,18 @@ export class FrontEndCommandHandler implements IAmACommandHandler {
         return [];
     }
 }
+
+export class MiniFrontEndCommandHandler implements IAmACommandHandler{
+    handles: string[] = ["*"]
+
+    private _serverUrl: string;
+
+    constructor(serverUrl: string){
+        this._serverUrl = serverUrl;
+    }
+
+    handle(command: IAmACommand, domainService: IAmADomainService): IAmARobotEvent[] {
+        postRequest(this._serverUrl, "/command", command);        
+        return [];
+    }
+}

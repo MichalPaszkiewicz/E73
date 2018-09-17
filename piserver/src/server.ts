@@ -13,6 +13,8 @@ import { MotorEventHandler } from "./hats/motozero/motoreventhandler";
 import { TwoWheelDriveCommandHandler } from "./commandhandlers/twowheeldrivecommandhandler";
 import { LearningService } from "./services/learningservice";
 import { LogEventHandler } from "./eventhandlers/logeventhandler";
+import { PowerCommandHandler } from "./commandhandlers/powercommandhandler";
+import { PowerEventHandler } from "./eventhandlers/powereventhandler";
 
 //need to define motors with "leftMotor" and "rightMotor" ids for TwoWheelDrive
 
@@ -34,6 +36,9 @@ controlModule.registerCommandHandler(new TwoWheelDriveCommandHandler());
 
 var learningService = new LearningService();
 learningService.attachToControlModule(controlModule);
+
+controlModule.registerCommandHandler(new PowerCommandHandler());
+controlModule.registerRobotEventHandler(new PowerEventHandler());
 
 var httpService = new HttpService(port);
 
