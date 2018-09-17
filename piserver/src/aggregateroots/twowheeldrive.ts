@@ -28,6 +28,12 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
     id?: string;
     handle(command: IAmACommand): IAmARobotEvent[] {
         var self = this;
+        if(self.automaticControlMode == true){
+            self.forwardOff();
+            self.backwardOff();
+            self.leftOff();
+            self.rightOff();
+        }
         self.automaticControlMode = false;
         switch(command.name){
             case TRIM_LEFT_COMMAND_NAME:
@@ -60,8 +66,10 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
                     setFullState.rightOn,
                     setFullState.speed,
                     setFullState.speedDifference);
+                break;
             case TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME:
                 self.automaticControlMode = true;
+                self.forward();
                 break;
         }
 
