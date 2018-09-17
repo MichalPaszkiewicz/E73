@@ -1,11 +1,5 @@
 # Read Me, Please. Pleeeeeease
 
-Put client.html + client.js on a computer/controller.
-
-
-Edit the `serverUrl` in client.js to have the port of the R-PI instead of "localhost"
-
-
 Put the whole piserver folder on the R-PI
 
 Open a command prompt in the location of package.json on the R-PI
@@ -21,13 +15,16 @@ run `tsc -p build/server`
 when finished, run `node dist/server.js`
 
 
-open up client.html on the computer/controller.
+the controller can then be opened up by going to http://[ip of r-pi]:3000/client.html
 
 
-Up and down arrow keys should move robot forwards + backwards, the slider in the display should change direction of the wheels. 
+Arrow keys on a keyboard should move the robot around, or it can be controlled using the circular controller. The "start recording" and "end recording" buttons can be used to record a sequence of events that will be replayable afterwards.
 
 
-If it is doing the opposite of what is expected, find the motor in server.js and switch the forward and backward pins (2nd and 3rd parameter in the motor constructors [lines 54 - 57]).
+After physically connecting up the robot to the motozero hat, go to src/server.ts and modify the ids of the motors that are in use to "leftMotor" and "rightMotor" (picking the correct ones).
+
+
+If a motor is doing the opposite of what is expected, find the motor in server.js and switch the forward and backward pins (2nd and 3rd parameter in the motor constructors [lines 54 - 57]). Or you could reverse the wiring of the motors.
 
 
 ## how to run tests
@@ -67,6 +64,14 @@ And then open up "virtual.html". You can draw lines by clicking on the box. The 
 ## todo
 
 Check that direction of bottom area of circle is as required
+
+Update Readme
+
+Create switch between line sensor/control mode
+
+On release of finger on circle control, default to off/middle.
+
+Shutdown/restart option on controller
 
 ## Further information
 

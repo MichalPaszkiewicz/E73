@@ -1,12 +1,8 @@
-import {getRequest, postRequest} from "./helpers/httprequest";
 import {drawCircleControl} from "./drawings/circlecontrol";
-import {LearningService} from "./services/learningservice";
 import {canvas, ctx, ctrlModule, learningModule} from "./clientbindings";
-import {DirectionKeyCommand} from "./commands/directionkeycommand";
 import {TrimLeftCommand} from "./commands/trimleftcommand";
 import {TrimRightCommand} from "./commands/trimrightcommand";
 import {ClickCircleCommand} from "./commands/clickcirclecommand";
-import {LocalStorageService} from "./services/localstorageservice";
 import {TouchService} from "./services/touchservice";
 import { StartLearningCommand } from "./commands/startlearningcommand";
 import { EndLearningCommand } from "./commands/endlearningcommand";

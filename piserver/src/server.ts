@@ -5,7 +5,6 @@ declare var process: any;
 const port = 3000;
 
 import {motorFactory} from "./hats/motozero/motorfactory";
-import {TwoWheelDrive} from "./aggregateroots/twowheeldrive";
 import {Robot} from "./objects/robot";
 import {HttpService} from "./services/httpservice";
 import { DefaultDomainService } from "./framework/services/defaultdomainservice";
@@ -13,6 +12,8 @@ import { DefaultControlModule } from "./framework/services/defaultcontrolmodule"
 import { MotorEventHandler } from "./hats/motozero/motoreventhandler";
 import { TwoWheelDriveCommandHandler } from "./commandhandlers/twowheeldrivecommandhandler";
 import { LearningService } from "./services/learningservice";
+
+//need to define motors with "leftMotor" and "rightMotor" ids for TwoWheelDrive
 
 var motor1 = motorFactory("motor1", 5, 24, 27);
 var motor2 = motorFactory("motor2", 17, 6, 22);

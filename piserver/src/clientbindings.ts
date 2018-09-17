@@ -1,5 +1,3 @@
-import {fakeMotorFactory} from "./hats/motozero/fakemotorfactory";
-import {TwoWheelDrive} from "./aggregateroots/twowheeldrive";
 import {Robot} from "./objects/robot";
 import { DefaultControlModule } from "./framework/services/defaultcontrolmodule";
 import { DefaultDomainService } from "./framework/services/defaultdomainservice";
