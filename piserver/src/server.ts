@@ -15,6 +15,7 @@ import { LearningService } from "./services/learningservice";
 import { LogEventHandler } from "./eventhandlers/logeventhandler";
 import { PowerCommandHandler } from "./commandhandlers/powercommandhandler";
 import { PowerEventHandler } from "./eventhandlers/powereventhandler";
+import { MultiFileStorageService } from "./services/multifilestorageservice";
 
 //need to define motors with "leftMotor" and "rightMotor" ids for TwoWheelDrive
 
@@ -34,8 +35,16 @@ controlModule.registerRobotEventHandler(logEventHandler);
 
 controlModule.registerCommandHandler(new TwoWheelDriveCommandHandler());
 
+const LEARNING_STORE_STRING = "LearntSequences";
+var store = new MultiFileStorageService("store");
+var sequences = store.getItem(LEARNING_STORE_STRING);
+
 var learningService = new LearningService();
 learningService.attachToControlModule(controlModule);
+learningService.sequences = sequences || [];
+learningService.registerOnSequenceAdded((s) => {
+	store.saveItem(LEARNING_STORE_STRING, learningService.sequences);
+});
 
 controlModule.registerCommandHandler(new PowerCommandHandler());
 controlModule.registerRobotEventHandler(new PowerEventHandler());
