@@ -2,6 +2,9 @@ import {IAmAControlModule} from "../framework/interfaces/iamacontrolmodule";
 import { OffCommand } from "../framework/commands/offcommand";
 import { IAmASensor } from "../framework/interfaces/iamasensor";
 import { IAmAUserInterface } from "../framework/interfaces/iamauserinterface";
+import { SensorPinsClearedEventHandler } from "../eventhandlers/sensorpinsclearedeventhandler";
+import { UserInterfaceEventHandler } from "../eventhandlers/userinterfaceeventhandler";
+import { ClearPinsCommand } from "../commands/clearpinscommand";
 
 export class Robot {
     
@@ -21,10 +24,7 @@ export class Robot {
         userInterface.registerOnCommanded((command) => {
             self._controlModule.handle(command);
         });
-        self._controlModule.registerRobotEventHandler({
-            handles: ["*"],
-            handle: (e) => userInterface.applyEvent(e)
-        });
+        self._controlModule.registerRobotEventHandler(new UserInterfaceEventHandler(userInterface));
         self._userInterfaces.push(userInterface);
     }
 
@@ -33,10 +33,15 @@ export class Robot {
         sensor.registerOnSensed((sensation) => {
             self._controlModule.sense(sensation);
         });
+        self._controlModule.registerRobotEventHandler(new SensorPinsClearedEventHandler(sensor));
         self._sensors.push(sensor);
     }
 
     off(){
         this._controlModule.handle(new OffCommand());
+    }
+
+    clear(){
+        this._controlModule.handle(new ClearPinsCommand());
     }
 }

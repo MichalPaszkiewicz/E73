@@ -1,7 +1,5 @@
 "use strict"
 
-declare var process: any;
-
 const port = 3000;
 
 import {motorFactory} from "./hats/motozero/motorfactory";
@@ -16,6 +14,8 @@ import { LogEventHandler } from "./eventhandlers/logeventhandler";
 import { PowerCommandHandler } from "./commandhandlers/powercommandhandler";
 import { PowerEventHandler } from "./eventhandlers/powereventhandler";
 import { MultiFileStorageService } from "./services/multifilestorageservice";
+import { OffCommandHandler } from "./framework/commandhandlers/offcommandhandler";
+import { Environment } from "./helpers/environment";
 
 //need to define motors with "leftMotor" and "rightMotor" ids for TwoWheelDrive
 
@@ -34,6 +34,7 @@ var logEventHandler = new LogEventHandler();
 controlModule.registerRobotEventHandler(logEventHandler);
 
 controlModule.registerCommandHandler(new TwoWheelDriveCommandHandler());
+controlModule.registerCommandHandler(new OffCommandHandler());
 
 const LEARNING_STORE_STRING = "LearntSequences";
 var store = new MultiFileStorageService("store");
@@ -57,7 +58,4 @@ var robot = new Robot(controlModule, [
 	
 ]);
 
-process.on('SIGINT', () => {
-	robot.off();
-	process.exit();
-});
+Environment.setup(robot);

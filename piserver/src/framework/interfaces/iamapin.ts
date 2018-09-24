@@ -8,4 +8,6 @@ export interface IAmAPin{
     edge(): PinEdge;
 
     watch(callback: (err: Error, value: 0 | 1) => void);
+
+    clear(): void;
 }

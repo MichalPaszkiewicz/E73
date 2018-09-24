@@ -41,4 +41,8 @@ export class Accelerometer implements IAmASensor {
     registerOnSensed(callback: (sensation: AccelerationFeltSensation) => void) {
         this._onSensed = (s) => callback(s);
     }
+
+    clear(){
+        throw new Error("Accelerometer has not implemented a clear method yet");
+    }
 }

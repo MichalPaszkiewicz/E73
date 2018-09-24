@@ -4,4 +4,5 @@ export interface IAmASensor{
 
     registerOnSensed(callback: (sensation: IAmASensation) => void);
 
+    clear(): void;
 }

@@ -11,7 +11,7 @@ import { CLICK_CIRCLE_COMMAND_NAME, ClickCircleCommand } from "../commands/click
 import { MotorSpeedSetEvent, MOTOR_SPEED_SET_EVENT_NAME } from "../hats/motozero/events/motorspeedsetevent";
 import { MotorTurnedOffEvent, MOTOR_TURNED_OFF_EVENT_NAME } from "../hats/motozero/events/motorturnedoffevent";
 import { SET_FULL_STATE_COMMAND_NAME, SetFullStateCommand } from "../commands/setfullstatecommand";
-import { TURNED_OFF_EVENT_NAME } from "../framework/events/turnedoffevent";
+import { TURNED_OFF_EVENT_NAME, TurnedOffEvent } from "../framework/events/turnedoffevent";
 import { LINE_FOUND_SENSATION_NAME, LineFoundSensation } from "../hats/linesensor/sensations/linefoundsensation";
 import { LINE_LOST_SENSATION_NAME, LineLostSensation } from "../hats/linesensor/sensations/linelostsensation";
 import { LineMeasure } from "./valueobjects/linemeasure";
@@ -20,6 +20,7 @@ import { LineMeasureArray } from "./entities/linemeasurearray";
 import { LineMeasureArrayMemory } from "./entities/linemeasurearraymemory";
 import { Vector2d } from "../helpers/vector";
 import { TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME } from "../commands/turnonautomaticcontrolcommand";
+import { OFF_COMMAND_NAME } from "../framework/commands/offcommand";
 
 export class TwoWheelDrive implements IAmAnAggregateRoot{
 
@@ -28,12 +29,6 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
     id?: string;
     handle(command: IAmACommand): IAmARobotEvent[] {
         var self = this;
-        if(self.automaticControlMode == true){
-            self.forwardOff();
-            self.backwardOff();
-            self.leftOff();
-            self.rightOff();
-        }
         self.automaticControlMode = false;
         switch(command.name){
             case TRIM_LEFT_COMMAND_NAME:
@@ -70,6 +65,9 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
             case TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME:
                 self.automaticControlMode = true;
                 self.forward();
+                self.backwardOff();
+                self.leftOff();
+                self.rightOff();
                 break;
         }
 

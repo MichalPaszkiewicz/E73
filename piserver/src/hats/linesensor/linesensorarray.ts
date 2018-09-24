@@ -32,4 +32,8 @@ export class LineSensorArray<T extends IAmAPin> implements IAmASensor {
         self._watchDefined = true;
         this._onSensationFunc = callback;
     }
+
+    clear(){
+        this._lineSensors.forEach(ls => ls.clear());
+    }
 }

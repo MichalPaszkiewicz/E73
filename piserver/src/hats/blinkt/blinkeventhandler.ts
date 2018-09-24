@@ -5,6 +5,7 @@ import { BLINKT_ALL_PIXELS_SET_EVENT_NAME, BlinktAllPixelsSetEvent } from "./eve
 import { BlinktPixelSetEvent, BLINKT_PIXEL_SET_EVENT_NAME } from "./events/blinktpixelsetevent";
 import { BLINKT_BRIGHTNESS_SET_EVENT_NAME, BlinktBrightnessSetEvent } from "./events/blinktbrightnesssetevent";
 import { TURNED_OFF_EVENT_NAME, TurnedOffEvent } from "../../framework/events/turnedoffevent";
+import { PINS_CLEARED_EVENT_NAME } from "../../events/pinsclearedevent";
 var Blinkt = require("node-blinkt");
 
 export class BlinktEventHandler implements IAmARobotEventHandler {
@@ -13,7 +14,8 @@ export class BlinktEventHandler implements IAmARobotEventHandler {
         BLINKT_CLEARED_EVENT_NAME,
         BLINKT_ALL_PIXELS_SET_EVENT_NAME,
         BLINKT_PIXEL_SET_EVENT_NAME,
-        BLINKT_BRIGHTNESS_SET_EVENT_NAME
+        BLINKT_BRIGHTNESS_SET_EVENT_NAME,
+        PINS_CLEARED_EVENT_NAME
     ];
     private _leds: any;
 
@@ -58,6 +60,9 @@ export class BlinktEventHandler implements IAmARobotEventHandler {
                     brightnessSetEvent.pixelNum,
                     brightnessSetEvent.brightness
                 );
+                break;
+            case PINS_CLEARED_EVENT_NAME:
+                self._leds.clearAll();
                 break;
             default:
                 break;

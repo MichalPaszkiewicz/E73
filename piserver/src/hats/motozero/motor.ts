@@ -49,6 +49,13 @@ export class Motor<T extends IAmAPin>implements IAmAMotor{
 		this._backwardPin.writeSync(0);
 	}
 
+	clear(){
+		this.off();
+		this._enablePin.clear();
+		this._forwardPin.clear();
+		this._backwardPin.clear();
+	}
+
 	setSpeed(newSpeed) {
 		if (newSpeed > 1 || newSpeed < -1) {
 			throw new Error("The speed must be between -1 and 1");

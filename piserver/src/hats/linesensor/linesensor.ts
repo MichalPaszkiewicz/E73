@@ -36,4 +36,8 @@ export class LineSensor<T extends IAmAPin> implements IAmASensor {
             }
         });
     }
+
+    clear(){
+        this._pin.clear();
+    }
 }

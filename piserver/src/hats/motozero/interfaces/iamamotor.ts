@@ -1,5 +1,7 @@
 export interface IAmAMotor{
-    off();
+    off(): void;
 
     setSpeed(value: number);
+
+    clear(): void;
 }

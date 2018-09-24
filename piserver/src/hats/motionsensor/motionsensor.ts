@@ -30,4 +30,8 @@ export class MotionSensor<T extends IAmAPin> implements IAmASensor {
             }
         });
     }
+
+    clear(){
+        this._pin.clear();
+    }
 }

@@ -5,12 +5,14 @@ import { MOTOR_SPEED_SET_EVENT_NAME, MotorSpeedSetEvent } from "./events/motorsp
 import { TURNED_OFF_EVENT_NAME, TurnedOffEvent } from "../../framework/events/turnedoffevent";
 import { Motor } from "./motor";
 import { IAmAPin } from "../../framework/interfaces/iamapin";
+import { PINS_CLEARED_EVENT_NAME } from "../../events/pinsclearedevent";
 
 export class MotorEventHandler<T extends IAmAPin> implements IAmARobotEventHandler {
     handles: string[] = [
         TURNED_OFF_EVENT_NAME,
         MOTOR_TURNED_OFF_EVENT_NAME,
-        MOTOR_SPEED_SET_EVENT_NAME
+        MOTOR_SPEED_SET_EVENT_NAME,
+        PINS_CLEARED_EVENT_NAME
     ];
 
     constructor(public motors: Motor<T>[]){
@@ -36,6 +38,11 @@ export class MotorEventHandler<T extends IAmAPin> implements IAmARobotEventHandl
                 self.motors
                     .filter(m => m.id == speedSet.motorId)
                     .forEach(m => m.setSpeed(speedSet.speed));
+                break;
+            case PINS_CLEARED_EVENT_NAME:
+                self.motors.forEach(motor => {
+                    motor.clear();
+                });
                 break;
             default:
                 break;

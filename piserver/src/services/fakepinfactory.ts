@@ -9,6 +9,7 @@ export class FakePin implements IAmAPin{
     private _state: PinState;
     private _edge: PinEdge;
     private _watch: (err: Error, value: 0 | 1) => void;
+    PIN_ACTIVATED: boolean = true;
 
     value(){
         return this._value;
@@ -38,6 +39,10 @@ export class FakePin implements IAmAPin{
     triggerWatch(err: Error, value: 0 | 1){
         this._value = value;
         this._watch(err, value);
+    }
+
+    clear(){
+        this.PIN_ACTIVATED = false;
     }
 }
 

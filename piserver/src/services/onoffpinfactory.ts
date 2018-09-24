@@ -5,7 +5,6 @@ import {PinState} from "../framework/enums/pinstate";
 import { PinEdge } from '../framework/enums/pinedge';
 
 export class OnOffPin implements IAmAPin{
-
     private _gpio: Gpio;
     private _state: PinState;
     private _value: number = 0;
@@ -37,6 +36,10 @@ export class OnOffPin implements IAmAPin{
 
     watch(callback: (err: Error, value: 0 | 1) => void) {
         this._gpio.watch((err, val: 0 | 1) => callback(err, val));
+    }
+
+    clear(): void {
+        this._gpio.unexport();
     }
 }
 
