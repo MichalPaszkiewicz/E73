@@ -1,26 +1,20 @@
-import { IAmAMotor } from "../hats/motozero/interfaces/iamamotor";
 import { ControlPermutation } from "./controlpermutation";
 import { IAmAnAggregateRoot } from "../framework/interfaces/iamanaggregateroot";
 import { IAmACommand } from "../framework/interfaces/iamacommand";
 import { IAmARobotEvent } from "../framework/interfaces/iamarobotevent";
-import { IAmASensation } from "../framework/interfaces/iamasensation";
 import { TRIM_LEFT_COMMAND_NAME } from "../commands/trimleftcommand";
 import { TRIM_RIGHT_COMMAND_NAME } from "../commands/trimrightcommand";
 import { DIRECTION_KEY_COMMAND_NAME, DirectionKeyCommand, DirectionKeyDirection } from "../commands/directionkeycommand";
-import { CLICK_CIRCLE_COMMAND_NAME, ClickCircleCommand } from "../commands/clickcirclecommand";
 import { MotorSpeedSetEvent, MOTOR_SPEED_SET_EVENT_NAME } from "../hats/motozero/events/motorspeedsetevent";
 import { MotorTurnedOffEvent, MOTOR_TURNED_OFF_EVENT_NAME } from "../hats/motozero/events/motorturnedoffevent";
 import { SET_FULL_STATE_COMMAND_NAME, SetFullStateCommand } from "../commands/setfullstatecommand";
-import { TURNED_OFF_EVENT_NAME, TurnedOffEvent } from "../framework/events/turnedoffevent";
+import { TURNED_OFF_EVENT_NAME } from "../framework/events/turnedoffevent";
 import { LINE_FOUND_SENSATION_NAME, LineFoundSensation } from "../hats/linesensor/sensations/linefoundsensation";
 import { LINE_LOST_SENSATION_NAME, LineLostSensation } from "../hats/linesensor/sensations/linelostsensation";
-import { LineMeasure } from "./valueobjects/linemeasure";
 import { DirectionKeyToFunc } from "./directionkeytofunc";
-import { LineMeasureArray } from "./entities/linemeasurearray";
 import { LineMeasureArrayMemory } from "./entities/linemeasurearraymemory";
 import { Vector2d } from "../helpers/vector";
 import { TURN_ON_AUTOMATIC_CONTROL_COMMAND_NAME } from "../commands/turnonautomaticcontrolcommand";
-import { OFF_COMMAND_NAME } from "../framework/commands/offcommand";
 
 export class TwoWheelDrive implements IAmAnAggregateRoot{
 
@@ -79,8 +73,6 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
 
     private _lineMeasures: LineMeasureArrayMemory;
 
-    private founds = 0;
-    private losts = 0;
 
     sense(sensation: LineLostSensation | LineFoundSensation): IAmARobotEvent[] {
         var self = this;
@@ -157,12 +149,10 @@ export class TwoWheelDrive implements IAmAnAggregateRoot{
     getSpeed(){return this._speed;};
     private _speedDifference: number = 0.5;
     getSpeedDifference(){return this._speedDifference;};
-    private _loggers: ((msg:string) => void)[] = [];
     _leftMotorVelocity: number = 0;
     _rightMotorVelocity: number = 0;
 
     clearLoggers(){
-        this._loggers = [];
     }
 
     unprocessedEvents: IAmARobotEvent[] = [];

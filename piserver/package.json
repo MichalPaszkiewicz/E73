@@ -3,14 +3,20 @@
   "version": "1.0.0",
   "description": "Program for running our robot",
   "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MichalPaszkiewicz/E73"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "get-pixels": "^3.3.2",
+    "node-blinkt": "^1.0.3",
     "onoff": "^2.0.0",
-    "typescript": "^2.8.1",
-    "node-blinkt": "^1.0.3"
+    "pi-camera": "^1.2.1",
+    "typescript": "^2.8.1"
   },
   "author": "E73",
   "license": "MIT",
@@ -27,6 +33,7 @@
     ]
   },
   "devDependencies": {
+    "@types/ndarray": "^1.0.6",
     "@types/node": "^9.6.31"
   }
 }
