@@ -1,5 +1,16 @@
 # Read Me, Please. Pleeeeeease
 
+## what on earth is this?
+
+This is the project of team E73 for a simple robot, including:
+
+- steering
+- remote control
+- automated line following
+- an in-browser simulation for testing the application
+
+## how to install
+
 Put the whole piserver folder on the R-PI
 
 Open a command prompt in the location of package.json on the R-PI
